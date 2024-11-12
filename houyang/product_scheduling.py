@@ -16,23 +16,21 @@ PROCESS_TIMES = {
         'Packaging': 1
     }
 }
-DEMAND = {'Product 1': 3, 'Product 2': 2}
+DEMAND = {'Product 1': 3, 'Product 2': 2}  # limit to 12, 5
 MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
 TIME_SLOTS = 32  # total time slots available per day
 ERROR_PENALTY = 1000
 
 # genetic algorithmp parameters
 POP_SIZE = 1000
-CXPB, MUTPB, NGEN = 0.7, 0.2, 1000  # crossover probability, mutation probability, and number of generations
+CXPB, MUTPB, NGEN = 0.7, 0.2, 100  # crossover probability, mutation probability, and number of generations
 
+# def biased_randint(low, high, bias_factor):
+#     # Generate a random number from an exponential distribution
+#     skewed_num = random.betavariate(bias_factor, 1)
 
-def biased_randint(low, high, bias_factor):
-    # Generate a random number from an exponential distribution
-    skewed_num = random.betavariate(bias_factor, 1)
-
-    # Scale the skewed number to the desired range
-    return low + int(skewed_num * (high - low))
-
+#     # Scale the skewed number to the desired range
+#     return low + int(skewed_num * (high - low))
 
 # define fitness and individual
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, ))
@@ -48,9 +46,9 @@ def create_individual():
         for process in PROCESS_TIMES[product]:
             for _ in range(DEMAND[product]):
                 machine = random.randint(0, MACHINES[process] - 1)
-                # time_slot = random.randint(0, TIME_SLOTS - PROCESS_TIMES[product][process])
-                time_slot = biased_randint(
-                    0, TIME_SLOTS - PROCESS_TIMES[product][process], 0.5)
+                time_slot = random.randint(
+                    0, TIME_SLOTS - PROCESS_TIMES[product][process])
+                # time_slot = biased_randint(0, TIME_SLOTS - PROCESS_TIMES[product][process], 0.95)
                 schedule.append((product, process, machine, time_slot))
     return schedule
 
@@ -90,6 +88,15 @@ def evaluate(individual):
                         start_time][prc] + process_count[itm][prev_time][prc]
 
             prev_time = start_time
+
+        # # not as good as array that has cut offs, since machine thinks it is fine to preform following process slower
+        # if (prev_time != start_time):
+        #     for time in range(1, start_time - prev_time + 1):
+        #         for itm in PROCESS_TIMES:
+        #             for prc in range(len(PROCESS_TIMES[itm])):
+        #                 process_count[itm][prev_time + time][prc] = process_count[itm][prev_time + time][prc] + process_count[itm][prev_time + time - 1][prc]
+
+        #     prev_time = start_time
 
         duration = PROCESS_TIMES[product][process]
         end_time = start_time + duration
@@ -178,6 +185,135 @@ toolbox.register("mate", cxSelectiveTwoPoint)
 toolbox.register("mutate", mutate, indpb=0.05)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
+from colorama import Fore
+
+
+def printSchedule(schedule):
+    makespan = evaluate(schedule)[0]
+
+    schedule = sorted(schedule, key=lambda x: x[3])
+
+    process_count = {
+        product: [[0] * len(PROCESS_TIMES[product])
+                  for _ in range(TIME_SLOTS + 1)]
+        for product in PROCESS_TIMES
+    }
+
+    machine_state = {
+        machine: [['e'] * MACHINES[machine] for _ in range(TIME_SLOTS + 1)]
+        for machine in MACHINES
+    }
+
+    prev_time = 0
+
+    for item in schedule:
+        product, process, machine, start_time = item
+
+        # increment the completed products, waiting for the next step of processing
+        if (prev_time != start_time):
+            for time in range(1, start_time - prev_time + 1):
+                for itm in PROCESS_TIMES:
+                    for prc in range(len(PROCESS_TIMES[itm])):
+                        process_count[itm][
+                            prev_time + time][prc] = process_count[itm][
+                                prev_time +
+                                time][prc] + process_count[itm][prev_time +
+                                                                time - 1][prc]
+
+            prev_time = start_time
+
+        duration = PROCESS_TIMES[product][process]
+        end_time = start_time + duration
+
+        # check if there are available product from the previous steps
+        if (process == 'Assembly'):
+            process_count[product][end_time][0] += 1
+        elif (process == 'Testing'):
+            if (process_count[product][start_time][0] > 0):
+                process_count[product][end_time][1] += 1
+
+        elif (process == 'Packaging'):
+            if (process_count[product][start_time][1] > 0):
+                process_count[product][end_time][2] += 1
+
+        # check for machines that are currently in use
+        if (machine_state[process][start_time][machine] == 'e'
+                or machine_state[process][start_time][machine] == 'n'):
+            lim = PROCESS_TIMES[product][process]
+            for i, p in enumerate(PROCESS_TIMES):
+                if (product == p):
+                    for i in range(lim):
+                        machine_state[process][start_time +
+                                               i][machine] = f"P{i+1}"
+            if (start_time + lim + 1 < TIME_SLOTS):
+                machine_state[process][start_time + lim + 1][machine] = 'n'
+
+    # increment the completed products, waiting for the next step of processing
+    start_time = prev_time + 1
+    if (prev_time != start_time):
+        for time in range(1, start_time - prev_time + 1):
+            for itm in PROCESS_TIMES:
+                for prc in range(len(PROCESS_TIMES[itm])):
+                    process_count[itm][prev_time + time][prc] = process_count[
+                        itm][prev_time +
+                             time][prc] + process_count[itm][prev_time + time -
+                                                             1][prc]
+
+        prev_time = start_time
+
+    schedule = np.asarray(schedule)
+
+    # print
+    print(Fore.WHITE + '')
+
+    print(Fore.WHITE + "-- PRODUCT DETAILS --")
+    for i, product in enumerate(PROCESS_TIMES):
+        print(Fore.GREEN + f"{i+1}. {product}")
+        for process in PROCESS_TIMES[product]:
+            print(Fore.LIGHTYELLOW_EX +
+                  f"\t{process}: {PROCESS_TIMES[product][process]}")
+
+    print(Fore.WHITE + "\n-- MACHINE TYPES --")
+    for i, process_type in enumerate(MACHINES):
+        print(Fore.LIGHTBLUE_EX +
+              f"{i+1}. {process_type}: {MACHINES[process_type]}")
+
+    print(Fore.WHITE + "\n-- TIME SLOTS --")
+    print(Fore.CYAN + f"{TIME_SLOTS} time slots. 15 mins each")
+
+    print(Fore.WHITE + "\n-- SCHEDULE FORMAT --")
+    print(Fore.WHITE + "[ " + Fore.GREEN + "product" + Fore.WHITE + ", " +
+          Fore.LIGHTYELLOW_EX + "process" + Fore.WHITE + ", " +
+          Fore.LIGHTBLUE_EX + "machine_num" + Fore.WHITE + ", " + Fore.CYAN +
+          "time_slot" + Fore.WHITE + " ]")
+
+    print(Fore.WHITE + "\n-- SCHEDULE --")
+    print(schedule)
+    print()
+
+    time_slots_header = 'TIME SLOT\t|'
+    for i in range(TIME_SLOTS):
+        time_slots_header += f"{i+1}\t|"
+    print(time_slots_header)
+
+    for product in PROCESS_TIMES:
+        print(f"{product}\t|")
+        for process in PROCESS_TIMES[product]:
+            process_row_str = f"  {process}\t|"
+            if (process == 'Assembly'):
+                prc = 0
+            elif (process == 'Testing'):
+                prc = 1
+            elif (process == 'Packaging'):
+                prc = 2
+            for i in range(TIME_SLOTS):
+                process_row_str += f"{process_count[product][i][prc]}\t|"
+            print(process_row_str)
+
+    print(Fore.WHITE + f"\n-- Makespan --" + Fore.RED + f"\n   {makespan}")
+
+    print(Fore.WHITE + '')
+
 
 def main():
     random.seed(42)
@@ -204,9 +340,7 @@ def main():
 if __name__ == '__main__':
     pop, log, hof = main()
     best_ind = hof.items[0]
-    print("Best schedule:")
-    print(np.asarray(sorted(best_ind, key=lambda x: x[3])))
-    # print(np.asarray(best_ind))
-    print(f"With makespan: {evaluate(best_ind)[0]}")
+
+    printSchedule(best_ind)
 
 # %%
