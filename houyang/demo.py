@@ -33,9 +33,9 @@ class Chromosome(object):
         for genome_first, genome_second in zip(self.chromosome,
                                                second_parent.chromosome):
             prob = random.random()
-            if prob < 0.2:
+            if prob < 0.25:
                 child_chromosome.append(genome_first)
-            elif prob < 0.9:
+            elif prob < 0.95:
                 child_chromosome.append(genome_second)
             else:
                 child_chromosome.append(self.genes_mutated())
@@ -48,13 +48,14 @@ class Chromosome(object):
         global SOLUTION
         fitness = 0
         for xx, yy in zip(self.chromosome, SOLUTION):
-            if xx != yy: fitness += 1
+            # if xx != yy: fitness += 1
+            if xx != yy: fitness += abs(GENES.find(yy) - GENES.find(xx))
         return fitness
 
 
-POPULATION_SIZE = 250
+POPULATION_SIZE = 300
 GENES = """ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz 0123456789, !-[]{}().;:_=&'#%/\\?@~$<>"""
-SOLUTION = "hei hei De Hei Ren {=.=} [>.<] \\('_')/"
+SOLUTION = "hei hei De Hei Ren {=.=} [>.<] \\('_')/ wo men shI Z0NG GU0 ren ([{!-.-!}])"
 
 
 def main():
