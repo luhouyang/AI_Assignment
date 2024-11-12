@@ -75,7 +75,7 @@ def main():
         # print top 5 of current generation
         print(f"Generation {generation}:")
         for g in population[:3]:
-            print(f"Chromosome: {"".join(g.chromosome)} | Fitness: {g.fitness}")
+            print(f"Chromosome: {''.join(g.chromosome)} | Fitness: {g.fitness}")
         print()
 
         # termination condition
