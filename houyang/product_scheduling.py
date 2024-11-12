@@ -1,9 +1,33 @@
 # %%
 import random
 import numpy as np
+import multiprocessing
 from deap import base, creator, tools, algorithms
 
 # constants for the problem
+"""
+mini example
+to run this faster, run in your terminal
+`python product_scheduling.py`
+"""
+# PROCESSES = ['Assembly', 'Testing', 'Packaging']
+# PROCESS_TIMES = {
+#     'Product 1': {
+#         'Assembly': 2,
+#         'Testing': 1,
+#         'Packaging': 1
+#     },
+# }
+# DEMAND = {'Product 1': 5}
+# MACHINES = {'Assembly': 1, 'Testing': 1, 'Packaging': 1}
+# WORK_HOURS = 8
+# TIME_SLOT_DURATION = 30
+"""
+simple example
+to run this faster, run in your terminal
+`python product_scheduling.py`
+"""
+PROCESSES = ['Assembly', 'Testing', 'Packaging']
 PROCESS_TIMES = {
     'Product 1': {
         'Assembly': 2,
@@ -16,24 +40,88 @@ PROCESS_TIMES = {
         'Packaging': 1
     }
 }
-DEMAND = {'Product 1': 3, 'Product 2': 2}  # limit to 12, 5
+DEMAND = {'Product 1': 5, 'Product 2': 4}
 MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
-TIME_SLOTS = 32  # total time slots available per day
-ERROR_PENALTY = 1000
+WORK_HOURS = 8
+TIME_SLOT_DURATION = 15
+"""
+medium example
+to run this faster, run in your terminal
+`python product_scheduling.py`
+"""
+# PROCESSES = ['Assembly', 'Testing', 'Packaging']
+# PROCESS_TIMES = {
+#     'Product 1': {
+#         'Assembly': 2,
+#         'Testing': 1,
+#         'Packaging': 1
+#     },
+#     'Product 2': {
+#         'Assembly': 3,
+#         'Testing': 2,
+#         'Packaging': 1
+#     },
+#     'Product 3': {
+#         'Assembly': 1,
+#         'Testing': 2,
+#         'Packaging': 2
+#     }
+# }
+# DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+# MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
+# WORK_HOURS = 8
+# TIME_SLOT_DURATION = 10
+"""
+MEGA example
+to run this faster, run in your terminal
+`python product_scheduling.py`
+"""
+# PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
+# PROCESS_TIMES = {
+#     'Product 1': {
+#         'Assembly': 2,
+#         'Testing': 1,
+#         'Packaging': 1,
+#         'Loading': 1
+#     },
+#     'Product 2': {
+#         'Assembly': 3,
+#         'Testing': 2,
+#         'Packaging': 1,
+#         'Loading': 1
+#     },
+#     'Product 3': {
+#         'Assembly': 1,
+#         'Testing': 2,
+#         'Packaging': 2,
+#         'Loading': 2
+#     }
+# }
+# DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+# MACHINES = {'Assembly': 20, 'Testing': 20, 'Packaging': 20, 'Loading': 20}
+# WORK_HOURS = 12
+# TIME_SLOT_DURATION = 10
+""""""
+# total time slots available per day
+TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
 # genetic algorithmp parameters
-POP_SIZE = 1000
-CXPB, MUTPB, NGEN = 0.7, 0.2, 100  # crossover probability, mutation probability, and number of generations
+ERROR_PENALTY = 10000
+POP_SIZE = 5000
+CXPB, MUTPB, NGEN = 0.7, 0.2, 50  # crossover probability, mutation probability, and number of generations
 
-# def biased_randint(low, high, bias_factor):
-#     # Generate a random number from an exponential distribution
-#     skewed_num = random.betavariate(bias_factor, 1)
 
-#     # Scale the skewed number to the desired range
-#     return low + int(skewed_num * (high - low))
+def biased_randint(low, high, bias_factor, prs, p):
+    # Generate a random number from an exponential distribution
+    skewed_num = random.betavariate(
+        min((prs.index(p) + bias_factor * 1.7) / len(prs), bias_factor), 1)
+
+    # Scale the skewed number to the desired range
+    return low + int(skewed_num * (high - low))
+
 
 # define fitness and individual
-creator.create("FitnessMin", base.Fitness, weights=(-1.0, ))
+creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
@@ -46,9 +134,10 @@ def create_individual():
         for process in PROCESS_TIMES[product]:
             for _ in range(DEMAND[product]):
                 machine = random.randint(0, MACHINES[process] - 1)
-                time_slot = random.randint(
-                    0, TIME_SLOTS - PROCESS_TIMES[product][process])
-                # time_slot = biased_randint(0, TIME_SLOTS - PROCESS_TIMES[product][process], 0.95)
+                # time_slot = random.randint(0, TIME_SLOTS - PROCESS_TIMES[product][process])
+                time_slot = biased_randint(
+                    0, TIME_SLOTS - PROCESS_TIMES[product][process], 0.98,
+                    PROCESSES, process)
                 schedule.append((product, process, machine, time_slot))
     return schedule
 
@@ -77,6 +166,8 @@ def evaluate(individual):
     prev_time = 0
     individual = sorted(individual, key=lambda x: x[3])
 
+    empty_machines = 0
+
     for item in individual:
         product, process, machine, start_time = item
 
@@ -102,20 +193,15 @@ def evaluate(individual):
         end_time = start_time + duration
 
         # check if there are available product from the previous steps
-        if (process == 'Assembly'):
-            process_count[product][end_time][0] += 1
-        elif (process == 'Testing'):
-            if (process_count[product][start_time][0] > 0):
-                process_count[product][start_time][0] -= 1
-                process_count[product][end_time][1] += 1
-            else:
-                penalty += ERROR_PENALTY
-        elif (process == 'Packaging'):
-            if (process_count[product][start_time][1] > 0):
-                process_count[product][start_time][1] -= 1
-                process_count[product][end_time][2] += 1
-            else:
-                penalty += ERROR_PENALTY
+        for ps_idx, ps in enumerate(PROCESSES):
+            if (process == ps and ps_idx == 0):
+                process_count[product][end_time][0] += 1
+            elif (process == ps):
+                if (process_count[product][start_time][ps_idx - 1] > 0):
+                    process_count[product][start_time][ps_idx - 1] -= 1
+                    process_count[product][end_time][ps_idx] += 1
+                else:
+                    penalty += ERROR_PENALTY
 
         # check for machines that are currently in use
         if (machine_state[process][start_time][machine] == 0
@@ -128,12 +214,20 @@ def evaluate(individual):
         else:
             penalty += ERROR_PENALTY
 
+        # for ts in range(max(0, start_time - duration), start_time):
+        for ts in range(0, start_time):
+            for i in range(MACHINES[process]):
+                if (machine_state[process][ts][i] == 0
+                        or machine_state[process][ts][i] == 2):
+                    empty_machines += 1
+
         # list of end times, [0, 0, 2, 3, 0]
-        end_times[end_time] = max(end_times[end_time], end_time)
+        end_times[end_time] = max(end_times[end_time], end_time + 1)
 
     makespan = max(end_times)
     makespan += penalty
-    return (makespan, )
+
+    return (makespan, empty_machines)
 
 
 def cxSelectiveTwoPoint(ind1, ind2):
@@ -148,13 +242,24 @@ def cxSelectiveTwoPoint(ind1, ind2):
 
     # Swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
     for i in range(cxpoint1, cxpoint2):
+        swappb = random.randint(0, 1)
+
         # Keep `product` and `process` constant
         product1, process1, machine1, time_slot1 = ind1[i]
         product2, process2, machine2, time_slot2 = ind2[i]
 
-        # Swap `machine` and `time_slot` values only
-        ind1[i] = (product1, process1, machine2, time_slot2)
-        ind2[i] = (product2, process2, machine1, time_slot1)
+        if swappb < 0.7:
+            # Swap `time_slot` values only
+            ind1[i] = (product1, process1, machine1, time_slot2)
+            ind2[i] = (product2, process2, machine2, time_slot1)
+        elif swappb < 0.75:
+            # Swap `machine` values only
+            ind1[i] = (product1, process1, machine2, time_slot1)
+            ind2[i] = (product2, process2, machine1, time_slot2)
+        else:
+            # Swap `machine` and `time_slot` values only
+            ind1[i] = (product1, process1, machine2, time_slot2)
+            ind2[i] = (product2, process2, machine1, time_slot1)
 
     return ind1, ind2
 
@@ -165,7 +270,7 @@ def mutate(individual, indpb=0.05):
         product, process, machine, time_slot = individual[i]
 
         # Apply mutation based on the probability `indpb`
-        if random.random() < indpb:
+        if random.random() < indpb * (MACHINES[process] - 1):
             # Mutate the machine assignment
             machine = random.randint(0, MACHINES[process] - 1)
 
@@ -183,12 +288,14 @@ def mutate(individual, indpb=0.05):
 toolbox.register("evaluate", evaluate)
 toolbox.register("mate", cxSelectiveTwoPoint)
 toolbox.register("mutate", mutate, indpb=0.05)
-toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("select", tools.selTournament, tournsize=5)
 
 from colorama import Fore
 
 
 def printSchedule(schedule):
+    write_str = ''
+
     makespan = evaluate(schedule)[0]
 
     schedule = sorted(schedule, key=lambda x: x[3])
@@ -226,15 +333,12 @@ def printSchedule(schedule):
         end_time = start_time + duration
 
         # check if there are available product from the previous steps
-        if (process == 'Assembly'):
-            process_count[product][end_time][0] += 1
-        elif (process == 'Testing'):
-            if (process_count[product][start_time][0] > 0):
-                process_count[product][end_time][1] += 1
-
-        elif (process == 'Packaging'):
-            if (process_count[product][start_time][1] > 0):
-                process_count[product][end_time][2] += 1
+        for ps_idx, ps in enumerate(PROCESSES):
+            if (process == ps and ps_idx == 0):
+                process_count[product][end_time][0] += 1
+            elif (process == ps):
+                if (process_count[product][start_time][ps_idx - 1] > 0):
+                    process_count[product][end_time][ps_idx] += 1
 
         # check for machines that are currently in use
         if (machine_state[process][start_time][machine] == 'e'
@@ -242,9 +346,9 @@ def printSchedule(schedule):
             lim = PROCESS_TIMES[product][process]
             for i, p in enumerate(PROCESS_TIMES):
                 if (product == p):
-                    for i in range(lim):
+                    for j in range(lim):
                         machine_state[process][start_time +
-                                               i][machine] = f"P{i+1}"
+                                               j][machine] = f"P{i+1}"
             if (start_time + lim + 1 < TIME_SLOTS):
                 machine_state[process][start_time + lim + 1][machine] = 'n'
 
@@ -262,58 +366,88 @@ def printSchedule(schedule):
         prev_time = start_time
 
     schedule = np.asarray(schedule)
+    for i in range(schedule.shape[0]):
+        schedule[i][2] = str(int(schedule[i][2]) + 1)
+        schedule[i][3] = str(int(schedule[i][3]) + 1)
 
     # print
     print(Fore.WHITE + '')
 
     print(Fore.WHITE + "-- PRODUCT DETAILS --")
+    write_str += "-- PRODUCT DETAILS --\n"
     for i, product in enumerate(PROCESS_TIMES):
         print(Fore.GREEN + f"{i+1}. {product}")
+        write_str += f"{i+1}. {product}\n"
         for process in PROCESS_TIMES[product]:
             print(Fore.LIGHTYELLOW_EX +
                   f"\t{process}: {PROCESS_TIMES[product][process]}")
+            write_str += f"\t{process}: {PROCESS_TIMES[product][process]}\n"
 
     print(Fore.WHITE + "\n-- MACHINE TYPES --")
+    write_str += "\n-- MACHINE TYPES --\n"
     for i, process_type in enumerate(MACHINES):
         print(Fore.LIGHTBLUE_EX +
               f"{i+1}. {process_type}: {MACHINES[process_type]}")
+        write_str += f"{i+1}. {process_type}: {MACHINES[process_type]}\n"
 
     print(Fore.WHITE + "\n-- TIME SLOTS --")
-    print(Fore.CYAN + f"{TIME_SLOTS} time slots. 15 mins each")
+    write_str += "\n-- TIME SLOTS --\n"
+    print(Fore.CYAN +
+          f"{TIME_SLOTS} time slots. {TIME_SLOT_DURATION} mins each")
+    write_str += f"{TIME_SLOTS} time slots. {TIME_SLOT_DURATION} mins each\n"
 
     print(Fore.WHITE + "\n-- SCHEDULE FORMAT --")
+    write_str += "\n-- SCHEDULE FORMAT --\n"
     print(Fore.WHITE + "[ " + Fore.GREEN + "product" + Fore.WHITE + ", " +
           Fore.LIGHTYELLOW_EX + "process" + Fore.WHITE + ", " +
           Fore.LIGHTBLUE_EX + "machine_num" + Fore.WHITE + ", " + Fore.CYAN +
           "time_slot" + Fore.WHITE + " ]")
+    write_str += "[ product, process, machine_num, time_slot ]\n"
 
     print(Fore.WHITE + "\n-- SCHEDULE --")
     print(schedule)
+    write_str += "\n-- SCHEDULE --\n"
+    for sch in schedule:
+        write_str += str(sch) + '\n'
+    write_str += '\n'
     print()
 
     print(f"-- NUMBER OF PRODUCT COMPLETED AT TIME --")
+    write_str += f"-- NUMBER OF PRODUCT COMPLETED AT TIME --\n"
     time_slots_header = 'TIME SLOT\t|'
     for i in range(TIME_SLOTS):
         time_slots_header += f"{i+1}\t|"
-    print(time_slots_header)
+    print(Fore.CYAN + time_slots_header)
+    write_str += time_slots_header + '\n'
 
     for product in PROCESS_TIMES:
-        print(f"{product}\t|")
-        for process in PROCESS_TIMES[product]:
+        print(Fore.GREEN + f"\n{product}\t|")
+        write_str += f"\n{product}\t|\n"
+        for i, process in enumerate(PROCESS_TIMES[product]):
             process_row_str = f"  {process}\t|"
-            if (process == 'Assembly'):
-                prc = 0
-            elif (process == 'Testing'):
-                prc = 1
-            elif (process == 'Packaging'):
-                prc = 2
-            for i in range(TIME_SLOTS):
-                process_row_str += f"{process_count[product][i][prc]}\t|"
-            print(process_row_str)
+            for ts in range(TIME_SLOTS):
+                process_row_str += f"{process_count[product][ts][i]}\t|"
+            print(Fore.LIGHTYELLOW_EX + process_row_str)
+            write_str += process_row_str + '\n'
+
+    for machine in machine_state:
+        print(Fore.LIGHTYELLOW_EX + f"\n{machine}  \t|")
+        write_str += f"\n{machine}  \t|\n"
+        for i in range(len(machine_state[machine][0])):
+            machine_row_str = f"  Machine {i+1}\t|"
+            for ts in range(TIME_SLOTS):
+                machine_row_str += f"{machine_state[machine][ts][i]}\t|"
+            print(Fore.LIGHTBLUE_EX + machine_row_str)
+            write_str += machine_row_str + '\n'
 
     print(Fore.WHITE + f"\n-- Makespan --" + Fore.RED + f"\n   {makespan}")
+    write_str += f"\n-- Makespan --" + f"\n   {makespan}\n"
 
     print(Fore.WHITE + '')
+
+    with open('log.txt', 'w+') as f:
+        f.write(write_str)
+        f.close()
 
 
 def main():
@@ -322,9 +456,9 @@ def main():
     hof = tools.HallOfFame(1)
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", np.mean)
-    stats.register("min", np.min)
-    stats.register("max", np.max)
+    stats.register("avg", np.mean, axis=0)
+    stats.register("min", np.min, axis=0)
+    stats.register("max", np.max, axis=0)
 
     pop, log = algorithms.eaSimple(pop,
                                    toolbox,
@@ -339,9 +473,17 @@ def main():
 
 
 if __name__ == '__main__':
+    # Process Pool
+    cpu_count = multiprocessing.cpu_count()
+    print(f"CPU count: {cpu_count}")
+    pool = multiprocessing.Pool(cpu_count)
+    toolbox.register("map", pool.map)
+
     pop, log, hof = main()
     best_ind = hof.items[0]
 
     printSchedule(best_ind)
+
+    pool.close()
 
 # %%
