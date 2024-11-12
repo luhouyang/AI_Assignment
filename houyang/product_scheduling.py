@@ -297,9 +297,9 @@ def printSchedule(schedule):
     print(time_slots_header)
 
     for product in PROCESS_TIMES:
-        print(f"{product}\t|")
+        print(f"{product}\t| NUMBER OF PRODUCT COMPLETED AT TIME")
         for process in PROCESS_TIMES[product]:
-            process_row_str = f"  {process}\t| NUMBER OF PRODUCT COMPLETED AT TIME"
+            process_row_str = f"  {process}\t|"
             if (process == 'Assembly'):
                 prc = 0
             elif (process == 'Testing'):
