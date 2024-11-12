@@ -291,13 +291,14 @@ def printSchedule(schedule):
     print(schedule)
     print()
 
+    print(f"-- NUMBER OF PRODUCT COMPLETED AT TIME --")
     time_slots_header = 'TIME SLOT\t|'
     for i in range(TIME_SLOTS):
         time_slots_header += f"{i+1}\t|"
     print(time_slots_header)
 
     for product in PROCESS_TIMES:
-        print(f"{product}\t| NUMBER OF PRODUCT COMPLETED AT TIME")
+        print(f"{product}\t|")
         for process in PROCESS_TIMES[product]:
             process_row_str = f"  {process}\t|"
             if (process == 'Assembly'):
