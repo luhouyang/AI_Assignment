@@ -299,7 +299,7 @@ def printSchedule(schedule):
     for product in PROCESS_TIMES:
         print(f"{product}\t|")
         for process in PROCESS_TIMES[product]:
-            process_row_str = f"  {process}\t|"
+            process_row_str = f"  {process}\t| NUMBER OF PRODUCT COMPLETED AT TIME"
             if (process == 'Assembly'):
                 prc = 0
             elif (process == 'Testing'):
