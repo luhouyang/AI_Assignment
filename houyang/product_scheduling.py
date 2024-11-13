@@ -2,7 +2,7 @@
 import random
 import numpy as np
 import multiprocessing
-from deap import base, creator, tools, algorithms
+from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io/en/master/
 
 # constants for the problem
 """
@@ -102,6 +102,9 @@ to run this faster, run in your terminal
 # WORK_HOURS = 12
 # TIME_SLOT_DURATION = 10
 """"""
+"""
+variables
+"""
 # total time slots available per day
 TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
@@ -119,12 +122,44 @@ for pd in PROCESS_TIMES:
             process_lag[pd][p] += PROCESS_TIMES[pd][PROCESSES[i]]
 
 
-def biased_randint(low, high, bias_factor, prs, p):
-    # Generate a random number from an exponential distribution
-    skewed_num = random.betavariate(
-        min((prs.index(p) + bias_factor * 1.7) / len(prs), bias_factor), 1)
+# random number generator used in creating initial population
+def biased_randint(low, high, bias_factor, processes, process):
+    """
+    random number generation, generates numbers skewed towards smaller indices
+    corresponding to earlier time slots, so time slots are filled more near the front
 
-    # Scale the skewed number to the desired range
+    generate a random number from an exponential distribution
+
+    (processes.index(process) + bias_factor * 1.7) / len(processes)
+    based on the process index, i.e. the order of the process, numbers are generated in that percentage range
+    exp.
+        PROCESSES = ['Assembly', 'Testing', 'Packaging']
+
+        Hence,
+            'Assembly' will be generated in the front 33%.
+            'Testing' in the front 66%.
+            'Packaging' 100% of the range
+        
+        Looking at example of 'Assembly',
+            processes.index(process) + bias_factor * 1.7
+                = 0 + 0.98 * 1.7
+                = 1.666
+            
+            len(processes)
+                = 3
+
+            1.666 / 3 = 0.555333...
+
+        Scale factor of 1.7 was used to increase the space that is explored by the initial population.
+        
+        To avoid numbers greater than 1 being generated & avoid saturation of the last process near the ending indices,
+        a min() function is used, so that the alpha value caps at 0.98 (bias_factor)
+    """
+    skewed_num = random.betavariate(
+        min((processes.index(process) + bias_factor * 1.7) / len(processes),
+            bias_factor), 1)
+
+    # scale the skewed number to the desired range
     return low + int(skewed_num * (high - low))
 
 
@@ -142,10 +177,12 @@ def create_individual():
         for process in PROCESS_TIMES[product]:
             for _ in range(DEMAND[product]):
                 machine = random.randint(0, MACHINES[process] - 1)
-                # time_slot = random.randint(0, TIME_SLOTS - PROCESS_TIMES[product][process])
-                time_slot = biased_randint(
-                    0, TIME_SLOTS - PROCESS_TIMES[product][process], 0.98,
-                    PROCESSES, process)
+
+                highest_index = TIME_SLOTS - PROCESS_TIMES[product][process]
+                # time_slot = random.randint(0, highest_index)
+                time_slot = biased_randint(0, highest_index, 0.98, PROCESSES,
+                                           process)
+
                 schedule.append((product, process, machine, time_slot))
     return schedule
 
@@ -157,29 +194,44 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # fitness function to minimize makespan
 def evaluate(individual):
+    # used to hold penalty when process occur before previous process is done
     penalty = 0
+
+    # hold all end time of processes
     end_times = [0] * (TIME_SLOTS + 1)
 
-    process_count = {
+    # hold completed processes, indexed by time slot
+    comp_process = {
         product: [[0] * len(PROCESS_TIMES[product])
                   for _ in range(TIME_SLOTS + 1)]
         for product in PROCESS_TIMES
     }
 
+    # hold machine state, 0 for empty, 1 for occupied
     machine_state = {
         machine: [[0] * MACHINES[machine] for _ in range(TIME_SLOTS + 1)]
         for machine in MACHINES
     }
 
+    # keep track of time slot increment, bring forward all items that have not proceeded to next process
     prev_time = 0
+
+    # sort the schedule according to time slot
     individual = sorted(individual, key=lambda x: x[3])
 
+    # hold fitness score for empty machine slots before a time slot
     empty_machines = 0
+
+    # hold fitness score for items that are left waiting for next process
     products_waiting = 0
 
     for item in individual:
         product, process, machine, start_time = item
 
+        duration = PROCESS_TIMES[product][process]
+        end_time = start_time + duration  # get end time
+
+        ###
         """
         increment the completed products, waiting for the next step of processing
         all the products that have not been consumed for the next process will be brought forward
@@ -187,18 +239,20 @@ def evaluate(individual):
         if (prev_time != start_time):
             for itm in PROCESS_TIMES:
                 for prc in range(len(PROCESS_TIMES[itm])):
+                    prev_items = comp_process[itm][prev_time][prc]
+                    cur_items = comp_process[itm][start_time][prc]
+
                     if (prc != len(PROCESSES) - 1):
-                        products_waiting += process_count[itm][prev_time][prc]
-                    process_count[itm][start_time][prc] = process_count[itm][start_time][prc] + process_count[itm][prev_time][prc]
+                        products_waiting += prev_items
+
+                    comp_process[itm][start_time][prc] = cur_items + prev_items
 
             prev_time = start_time
 
         if (products_waiting == 0):
             products_waiting = 10
 
-        duration = PROCESS_TIMES[product][process]
-        end_time = start_time + duration
-
+        ###
         """
         check if there are available product from the previous steps
         since products need to follow the process sequence, need to check if there are any from previous process
@@ -210,14 +264,15 @@ def evaluate(individual):
         """
         for ps_idx, ps in enumerate(PROCESSES):
             if (process == ps and ps_idx == 0):
-                process_count[product][end_time][0] += 1
+                comp_process[product][end_time][0] += 1
             elif (process == ps):
-                if (process_count[product][start_time][ps_idx - 1] > 0):
-                    process_count[product][start_time][ps_idx - 1] -= 1
-                    process_count[product][end_time][ps_idx] += 1
+                if (comp_process[product][start_time][ps_idx - 1] > 0):
+                    comp_process[product][start_time][ps_idx - 1] -= 1
+                    comp_process[product][end_time][ps_idx] += 1
                 else:
                     penalty += ERROR_PENALTY
 
+        ###
         """
         checks if current machine spot is in use
         if 0 then it is not in use, proceed mark array as 1 for number of time slots to process
@@ -244,6 +299,7 @@ def evaluate(individual):
         else:
             penalty += ERROR_PENALTY
 
+        ###
         """
         check for empty machine spots from time slot 0 to current start time
         any spots marked with 0 is considered empty
@@ -260,38 +316,57 @@ def evaluate(individual):
 
     makespan = max(end_times)
     makespan += penalty
+    """
+    makespan: total time slots taken to complete the order
+    empty_machines: aggregate of empty machines from 0 to current time, of each process
+    product_waiting: aggregate of products that are waiting for next process to use them
 
+    all score need to be minimized for optimal solution
+
+    'makespan' is the primary score, since if there is overlap the penalty will be big. 
+    once there is no overlap, makespan will have small value that can easily be minimized
+
+    'empty_machine' encourages processes to be moved vertically
+    (moved to empty machines in the same time slot)
+    once 'makespan' stagnates, 'empty_machine' can continue to be optimized
+    leading to a more optimal solution and potentially decreasing 'makespan'
+
+    'products_waiting' encourages processes to be moved horizontally
+    (moved to earlier time slots, to prevent waiting time)
+    once 'makespan' stagnates, 'product_waiting' can continue to be optimized
+    leading to a more optimal solution and potentially decreasing 'makespan'
+    """
     return (makespan, empty_machines, products_waiting)
 
 
 def cxSelectiveTwoPoint(ind1, ind2):
-    # Choose crossover points
+    # choose crossover points
     size = len(ind1)
     cxpoint1 = random.randint(1, size - 1)
     cxpoint2 = random.randint(1, size - 1)
 
-    # Ensure cxpoint1 is less than cxpoint2
+    # ensure cxpoint1 is less than cxpoint2
     if cxpoint1 > cxpoint2:
         cxpoint1, cxpoint2 = cxpoint2, cxpoint1
 
-    # Swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
+    # swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
     for i in range(cxpoint1, cxpoint2):
         swappb = random.randint(0, 1)
 
-        # Keep `product` and `process` constant
+        # keep `product` and `process` constant
         product1, process1, machine1, time_slot1 = ind1[i]
         product2, process2, machine2, time_slot2 = ind2[i]
 
         if swappb < 0.7:
-            # Swap `time_slot` values only
+            # swap `time_slot` values only
             ind1[i] = (product1, process1, machine1, time_slot2)
             ind2[i] = (product2, process2, machine2, time_slot1)
         elif swappb < 0.75:
-            # Swap `machine` values only
+            # swap `machine` values only
             ind1[i] = (product1, process1, machine2, time_slot1)
             ind2[i] = (product2, process2, machine1, time_slot2)
         else:
-            # Swap `machine` and `time_slot` values only
+            # swap `machine` and `time_slot` values only
             ind1[i] = (product1, process1, machine2, time_slot2)
             ind2[i] = (product2, process2, machine1, time_slot1)
 
@@ -300,21 +375,21 @@ def cxSelectiveTwoPoint(ind1, ind2):
 
 def mutate(individual, indpb=0.05):
     for i in range(len(individual)):
-        # Unpack the current schedule entry
+        # unpack the current schedule entry
         product, process, machine, time_slot = individual[i]
 
-        # Apply mutation based on the probability `indpb`
+        # apply mutation based on the probability `indpb`
         if random.random() < indpb * (MACHINES[process] - 1):
-            # Mutate the machine assignment
+            # mutate the machine assignment
             machine = random.randint(0, MACHINES[process] - 1)
 
         if random.random() < indpb:
-            # Mutate the time slot
+            # mutate the time slot
             time_slot = random.randint(
                 process_lag[product][process],
                 TIME_SLOTS - PROCESS_TIMES[product][process])
 
-        # Update the individual's schedule with the mutated values
+        # update the individual's schedule with the mutated values
         individual[i] = (product, process, machine, time_slot)
 
     return (individual, )
@@ -325,9 +400,10 @@ toolbox.register("mate", cxSelectiveTwoPoint)
 toolbox.register("mutate", mutate, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=5)
 
-from colorama import Fore
+from colorama import Fore  # for color text in terminal/notebook
 
 
+# print function to display in terminal/notebook and write to log.txt file
 def printSchedule(schedule):
     write_str = ''
 
@@ -381,7 +457,8 @@ def printSchedule(schedule):
             for i, p in enumerate(PROCESS_TIMES):
                 if (product == p):
                     for j in range(lim):
-                        machine_state[process][start_time + j][machine] = f"P{i+1}"
+                        machine_state[process][start_time +
+                                               j][machine] = f"P{i+1}"
 
     # increment the completed products, waiting for the next step of processing
     start_time = prev_time + 1
@@ -504,15 +581,17 @@ def main():
 
 
 if __name__ == '__main__':
-    # Process Pool
+    # process pool for parallel processing & multi threading
     cpu_count = multiprocessing.cpu_count()
     print(f"CPU count: {cpu_count}")
     pool = multiprocessing.Pool(cpu_count)
     toolbox.register("map", pool.map)
 
+    # main driver
     pop, log, hof = main()
     best_ind = hof.items[0]
 
+    # output results
     printSchedule(best_ind)
 
     pool.close()
