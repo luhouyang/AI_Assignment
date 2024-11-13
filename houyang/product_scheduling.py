@@ -24,7 +24,7 @@ to run this faster, run in your terminal
 # TIME_SLOT_DURATION = 30
 """
 simple example
-to run this faster, run in your terminal
+# to run this faster, run in your terminal
 `python product_scheduling.py`
 """
 PROCESSES = ['Assembly', 'Testing', 'Packaging']
@@ -98,7 +98,7 @@ to run this faster, run in your terminal
 #     }
 # }
 # DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
-# MACHINES = {'Assembly': 20, 'Testing': 20, 'Packaging': 20, 'Loading': 20}
+# MACHINES = {'Assembly': 12, 'Testing': 12, 'Packaging': 12, 'Loading': 12}
 # WORK_HOURS = 12
 # TIME_SLOT_DURATION = 10
 """"""
@@ -107,8 +107,16 @@ TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
 # genetic algorithmp parameters
 ERROR_PENALTY = 10000
-POP_SIZE = 5000
+POP_SIZE = 10000
 CXPB, MUTPB, NGEN = 0.7, 0.2, 50  # crossover probability, mutation probability, and number of generations
+
+process_lag = {}
+for pd in PROCESS_TIMES:
+    process_lag[pd] = {}
+    for p in PROCESS_TIMES[pd]:
+        process_lag[pd][p] = 0
+        for i in range(PROCESSES.index(p)):
+            process_lag[pd][p] += PROCESS_TIMES[pd][PROCESSES[i]]
 
 
 def biased_randint(low, high, bias_factor, prs, p):
@@ -121,7 +129,7 @@ def biased_randint(low, high, bias_factor, prs, p):
 
 
 # define fitness and individual
-creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0))
+creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
@@ -167,32 +175,39 @@ def evaluate(individual):
     individual = sorted(individual, key=lambda x: x[3])
 
     empty_machines = 0
+    products_waiting = 0
 
     for item in individual:
         product, process, machine, start_time = item
 
-        # increment the completed products, waiting for the next step of processing
+        """
+        increment the completed products, waiting for the next step of processing
+        all the products that have not been consumed for the next process will be brought forward
+        """
         if (prev_time != start_time):
             for itm in PROCESS_TIMES:
                 for prc in range(len(PROCESS_TIMES[itm])):
-                    process_count[itm][start_time][prc] = process_count[itm][
-                        start_time][prc] + process_count[itm][prev_time][prc]
+                    if (prc != len(PROCESSES) - 1):
+                        products_waiting += process_count[itm][prev_time][prc]
+                    process_count[itm][start_time][prc] = process_count[itm][start_time][prc] + process_count[itm][prev_time][prc]
 
             prev_time = start_time
 
-        # # not as good as array that has cut offs, since machine thinks it is fine to preform following process slower
-        # if (prev_time != start_time):
-        #     for time in range(1, start_time - prev_time + 1):
-        #         for itm in PROCESS_TIMES:
-        #             for prc in range(len(PROCESS_TIMES[itm])):
-        #                 process_count[itm][prev_time + time][prc] = process_count[itm][prev_time + time][prc] + process_count[itm][prev_time + time - 1][prc]
-
-        #     prev_time = start_time
+        if (products_waiting == 0):
+            products_waiting = 10
 
         duration = PROCESS_TIMES[product][process]
         end_time = start_time + duration
 
-        # check if there are available product from the previous steps
+        """
+        check if there are available product from the previous steps
+        since products need to follow the process sequence, need to check if there are any from previous process
+        
+        if process index is 0, that means the first process, then add 1 to the index
+        else deduct one from previous, and add one to current
+
+        when indexing we index with start time, when adding we add to end time
+        """
         for ps_idx, ps in enumerate(PROCESSES):
             if (process == ps and ps_idx == 0):
                 process_count[product][end_time][0] += 1
@@ -203,22 +218,41 @@ def evaluate(individual):
                 else:
                     penalty += ERROR_PENALTY
 
-        # check for machines that are currently in use
-        if (machine_state[process][start_time][machine] == 0
-                or machine_state[process][start_time][machine] == 2):
+        """
+        checks if current machine spot is in use
+        if 0 then it is not in use, proceed mark array as 1 for number of time slots to process
+        exp. 
+            process start = 2 
+            process time = 3
+            machine = 1
+
+            using 0 indexing
+            [
+                [0, 0, 0, 0, 0, 0],
+                [0, 0, 1, 1, 1, 0]
+            ]
+
+            since process takes 3 slots to complete, starting from slot 2
+
+        if the machine is already occupied, give the individual (genome/sequence) a heavy penalty,
+        since this means it is trying to occupy a machine in use
+        """
+        if (machine_state[process][start_time][machine] == 0):
             lim = PROCESS_TIMES[product][process]
             for i in range(lim):
                 machine_state[process][start_time + i][machine] = 1
-            if (start_time + lim + 1 < TIME_SLOTS):
-                machine_state[process][start_time + lim + 1][machine] = 2
         else:
             penalty += ERROR_PENALTY
 
+        """
+        check for empty machine spots from time slot 0 to current start time
+        any spots marked with 0 is considered empty
+        motivation of this fitness score is to encourage earlier spots to be filled in first
+        """
         # for ts in range(max(0, start_time - duration), start_time):
         for ts in range(0, start_time):
             for i in range(MACHINES[process]):
-                if (machine_state[process][ts][i] == 0
-                        or machine_state[process][ts][i] == 2):
+                if (machine_state[process][ts][i] == 0):
                     empty_machines += 1
 
         # list of end times, [0, 0, 2, 3, 0]
@@ -227,7 +261,7 @@ def evaluate(individual):
     makespan = max(end_times)
     makespan += penalty
 
-    return (makespan, empty_machines)
+    return (makespan, empty_machines, products_waiting)
 
 
 def cxSelectiveTwoPoint(ind1, ind2):
@@ -277,7 +311,8 @@ def mutate(individual, indpb=0.05):
         if random.random() < indpb:
             # Mutate the time slot
             time_slot = random.randint(
-                0, TIME_SLOTS - PROCESS_TIMES[product][process])
+                process_lag[product][process],
+                TIME_SLOTS - PROCESS_TIMES[product][process])
 
         # Update the individual's schedule with the mutated values
         individual[i] = (product, process, machine, time_slot)
@@ -287,7 +322,7 @@ def mutate(individual, indpb=0.05):
 
 toolbox.register("evaluate", evaluate)
 toolbox.register("mate", cxSelectiveTwoPoint)
-toolbox.register("mutate", mutate, indpb=0.05)
+toolbox.register("mutate", mutate, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=5)
 
 from colorama import Fore
@@ -341,16 +376,12 @@ def printSchedule(schedule):
                     process_count[product][end_time][ps_idx] += 1
 
         # check for machines that are currently in use
-        if (machine_state[process][start_time][machine] == 'e'
-                or machine_state[process][start_time][machine] == 'n'):
+        if (machine_state[process][start_time][machine] == 'e'):
             lim = PROCESS_TIMES[product][process]
             for i, p in enumerate(PROCESS_TIMES):
                 if (product == p):
                     for j in range(lim):
-                        machine_state[process][start_time +
-                                               j][machine] = f"P{i+1}"
-            if (start_time + lim + 1 < TIME_SLOTS):
-                machine_state[process][start_time + lim + 1][machine] = 'n'
+                        machine_state[process][start_time + j][machine] = f"P{i+1}"
 
     # increment the completed products, waiting for the next step of processing
     start_time = prev_time + 1
