@@ -1,7 +1,6 @@
 # %%
 import random
 import numpy as np
-import math
 import multiprocessing
 from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io/en/master/
 
@@ -73,7 +72,7 @@ to run this faster, run in your terminal
 # WORK_HOURS = 8
 # TIME_SLOT_DURATION = 10
 """
-MEGA example | HIGHSCORE: 46
+MEGA example | HIGHSCORE: 36
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -200,43 +199,42 @@ for m in MACHINES:
     total_machines += MACHINES[m]
 
 
-# random number generator used in creating initial population
-def biased_randint(low, high, processes, process):
-    """
-    random number generation, generates numbers skewed towards smaller indices
-    corresponding to earlier time slots, so time slots are filled more near the front
+# # random number generator used in creating initial population
+# def biased_randint(low, high, product, process):
+#     """
+#     random number generation, generates numbers skewed towards smaller indices
+#     corresponding to earlier time slots, so time slots are filled more near the front
 
-    generate a random number from an exponential distribution
+#     generate a random number from an exponential distribution
 
-    (processes.index(process) + 10 / total_products) / len(processes), 1)
-    based on the process index, i.e. the order of the process, numbers are generated in that percentage range
-    exp.
-        PROCESSES = ['Assembly', 'Testing', 'Packaging']
+#     (processes.index(process) + 10 / total_products) / len(processes), 1)
+#     based on the process index, i.e. the order of the process, numbers are generated in that percentage range
+#     exp.
+#         PROCESSES = ['Assembly', 'Testing', 'Packaging']
 
-        Hence,
-            'Assembly' will be generated in the front 33%.
-            'Testing' in the front 66%.
-            'Packaging' 100% of the range
+#         Hence,
+#             'Assembly' will be generated in the front 33%.
+#             'Testing' in the front 66%.
+#             'Packaging' 100% of the range
         
-        Looking at example of 'Assembly',
-            processes.index(process) + 10 / total_products
-                = 0 + 10/30
-                = 0.33
+#         Looking at example of 'Assembly',
+#             processes.index(process) + 10 / total_products
+#                 = 0 + 10/30
+#                 = 0.33
             
-            len(processes)
-                = 3
+#             len(processes)
+#                 = 3
 
-            0.33 / 3 = 0.11
+#             0.33 / 3 = 0.11
 
-        skew is noralized by total_products.
-        the less number of total_products, the more normally distributed
-        the more number of total_products, the more right skewed
-    """
-    skewed_num = random.betavariate(
-        (processes.index(process) + math.sqrt((total_products* len(PROCESSES)) / total_machines)) / len(processes), 1)
+#         skew is noralized by total_products.
+#         the less number of total_products, the more normally distributed 
+#         the more number of total_products, the more right skewed
+#     """
+#     skewed_num = random.betavariate(0.3, 1)
 
-    # scale the skewed number to the desired range
-    return low + int(skewed_num * (high - low))
+#     # scale the skewed number to the desired range
+#     return low + int(skewed_num * (high - low))
 
 
 # define fitness and individual
@@ -248,19 +246,24 @@ toolbox = base.Toolbox()
 
 # individual generator
 def create_individual():
+    eps = 1.5
     schedule = []
     for product in PROCESS_TIMES:
         for process in PROCESS_TIMES[product]:
             for _ in range(DEMAND[product]):
                 machine = random.randint(0, MACHINES[process] - 1)
 
+                lowest_index = process_lag[product][process]
                 highest_index = TIME_SLOTS - PROCESS_TIMES[product][process]
 
-                # time_slot = random.randint(process_lag[product][process],
-                #                           highest_index)
+                rng = int(highest_index * (PROCESSES.index(process) + eps) /
+                          (len(PROCESSES)))
 
-                time_slot = biased_randint(process_lag[product][process],
-                                           highest_index, PROCESSES, process)
+                time_slot = random.randint(
+                    lowest_index, min(lowest_index + rng, highest_index))
+
+                # time_slot = biased_randint(process_lag[product][process],
+                #                            highest_index, product, process)
 
                 schedule.append((product, process, machine, time_slot))
     return schedule
