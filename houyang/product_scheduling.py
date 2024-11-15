@@ -27,23 +27,23 @@ simple example | HIGHSCORE: 14
 # to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-# PROCESSES = ['Assembly', 'Testing', 'Packaging']
-# PROCESS_TIMES = {
-#     'Product 1': {
-#         'Assembly': 2,
-#         'Testing': 1,
-#         'Packaging': 1
-#     },  # time slots required
-#     'Product 2': {
-#         'Assembly': 3,
-#         'Testing': 2,
-#         'Packaging': 1
-#     }
-# }
-# DEMAND = {'Product 1': 5, 'Product 2': 4}
-# MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
-# WORK_HOURS = 8
-# TIME_SLOT_DURATION = 15
+PROCESSES = ['Assembly', 'Testing', 'Packaging']
+PROCESS_TIMES = {
+    'Product 1': {
+        'Assembly': 2,
+        'Testing': 1,
+        'Packaging': 1
+    },  # time slots required
+    'Product 2': {
+        'Assembly': 3,
+        'Testing': 2,
+        'Packaging': 1
+    }
+}
+DEMAND = {'Product 1': 5, 'Product 2': 4}
+MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
+WORK_HOURS = 8
+TIME_SLOT_DURATION = 15
 """
 medium example | HIGHSCORE: 20
 to run this faster, run in your terminal
@@ -102,67 +102,67 @@ to run this faster, run in your terminal
 # WORK_HOURS = 12
 # TIME_SLOT_DURATION = 10
 """
-HEHEHAHA example | HIGHSCORE: 144
+HEHEHAHA example | HIGHSCORE: 131
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
-PROCESS_TIMES = {
-    'Cookie': {
-        'Assembly': 2,
-        'Testing': 1,
-        'Packaging': 1,
-        'Loading': 1
-    },
-    'EV car': {
-        'Assembly': 10,
-        'Testing': 2,
-        'Packaging': 1,
-        'Loading': 1
-    },
-    'Hose': {
-        'Assembly': 1,
-        'Testing': 2,
-        'Packaging': 2,
-        'Loading': 2
-    },
-    'Plumbus': {
-        'Assembly': 4,
-        'Testing': 5,
-        'Packaging': 2,
-        'Loading': 2
-    },
-    'Bomb': {
-        'Assembly': 1,
-        'Testing': 4,
-        'Packaging': 5,
-        'Loading': 2
-    },
-    'Cake': {
-        'Assembly': 3,
-        'Testing': 1,
-        'Packaging': 2,
-        'Loading': 1
-    },
-    'Bolts': {
-        'Assembly': 1,
-        'Testing': 1,
-        'Packaging': 1,
-        'Loading': 1
-    }
-}
-DEMAND = {
-    'Cookie': 15,
-    'EV car': 10,
-    'Hose': 14,
-    'Plumbus': 7,
-    'Bomb': 7,
-    'Cake': 7,
-    'Bolts': 20
-}
-MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
-WORK_HOURS = 12
-TIME_SLOT_DURATION = 5
+# PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
+# PROCESS_TIMES = {
+#     'Cookie': {
+#         'Assembly': 2,
+#         'Testing': 1,
+#         'Packaging': 1,
+#         'Loading': 1
+#     },
+#     'EV car': {
+#         'Assembly': 10,
+#         'Testing': 2,
+#         'Packaging': 1,
+#         'Loading': 1
+#     },
+#     'Hose': {
+#         'Assembly': 1,
+#         'Testing': 2,
+#         'Packaging': 2,
+#         'Loading': 2
+#     },
+#     'Plumbus': {
+#         'Assembly': 4,
+#         'Testing': 5,
+#         'Packaging': 2,
+#         'Loading': 2
+#     },
+#     'Bomb': {
+#         'Assembly': 1,
+#         'Testing': 4,
+#         'Packaging': 5,
+#         'Loading': 2
+#     },
+#     'Cake': {
+#         'Assembly': 3,
+#         'Testing': 1,
+#         'Packaging': 2,
+#         'Loading': 1
+#     },
+#     'Bolts': {
+#         'Assembly': 1,
+#         'Testing': 1,
+#         'Packaging': 1,
+#         'Loading': 1
+#     }
+# }
+# DEMAND = {
+#     'Cookie': 15,
+#     'EV car': 10,
+#     'Hose': 14,
+#     'Plumbus': 7,
+#     'Bomb': 7,
+#     'Cake': 7,
+#     'Bolts': 20
+# }
+# MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
+# WORK_HOURS = 12
+# TIME_SLOT_DURATION = 5
 """"""
 """
 variables
@@ -199,44 +199,6 @@ for m in MACHINES:
     total_machines += MACHINES[m]
 
 
-# # random number generator used in creating initial population
-# def biased_randint(low, high, product, process):
-#     """
-#     random number generation, generates numbers skewed towards smaller indices
-#     corresponding to earlier time slots, so time slots are filled more near the front
-
-#     generate a random number from an exponential distribution
-
-#     (processes.index(process) + 10 / total_products) / len(processes), 1)
-#     based on the process index, i.e. the order of the process, numbers are generated in that percentage range
-#     exp.
-#         PROCESSES = ['Assembly', 'Testing', 'Packaging']
-
-#         Hence,
-#             'Assembly' will be generated in the front 33%.
-#             'Testing' in the front 66%.
-#             'Packaging' 100% of the range
-        
-#         Looking at example of 'Assembly',
-#             processes.index(process) + 10 / total_products
-#                 = 0 + 10/30
-#                 = 0.33
-            
-#             len(processes)
-#                 = 3
-
-#             0.33 / 3 = 0.11
-
-#         skew is noralized by total_products.
-#         the less number of total_products, the more normally distributed 
-#         the more number of total_products, the more right skewed
-#     """
-#     skewed_num = random.betavariate(0.3, 1)
-
-#     # scale the skewed number to the desired range
-#     return low + int(skewed_num * (high - low))
-
-
 # define fitness and individual
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
@@ -261,9 +223,6 @@ def create_individual():
 
                 time_slot = random.randint(
                     lowest_index, min(lowest_index + rng, highest_index))
-
-                # time_slot = biased_randint(process_lag[product][process],
-                #                            highest_index, product, process)
 
                 schedule.append((product, process, machine, time_slot))
     return schedule
@@ -696,10 +655,6 @@ if __name__ == '__main__':
     # main driver
     pop, log, hof = main()
     best_ind = hof.items[0]
-
-    # with open('result.txt', 'w+') as f:
-    #     f.write(log)
-    #     f.close()
 
     # output results
     printSchedule(best_ind)
