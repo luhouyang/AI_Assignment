@@ -1,12 +1,13 @@
 # %%
 import random
 import numpy as np
+import math
 import multiprocessing
 from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io/en/master/
 
 # constants for the problem
 """
-mini example
+mini example | HIGHSCORE: 13
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -23,29 +24,29 @@ to run this faster, run in your terminal
 # WORK_HOURS = 8
 # TIME_SLOT_DURATION = 30
 """
-simple example
+simple example | HIGHSCORE: 14
 # to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-PROCESSES = ['Assembly', 'Testing', 'Packaging']
-PROCESS_TIMES = {
-    'Product 1': {
-        'Assembly': 2,
-        'Testing': 1,
-        'Packaging': 1
-    },  # time slots required
-    'Product 2': {
-        'Assembly': 3,
-        'Testing': 2,
-        'Packaging': 1
-    }
-}
-DEMAND = {'Product 1': 5, 'Product 2': 4}
-MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
-WORK_HOURS = 8
-TIME_SLOT_DURATION = 15
+# PROCESSES = ['Assembly', 'Testing', 'Packaging']
+# PROCESS_TIMES = {
+#     'Product 1': {
+#         'Assembly': 2,
+#         'Testing': 1,
+#         'Packaging': 1
+#     },  # time slots required
+#     'Product 2': {
+#         'Assembly': 3,
+#         'Testing': 2,
+#         'Packaging': 1
+#     }
+# }
+# DEMAND = {'Product 1': 5, 'Product 2': 4}
+# MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
+# WORK_HOURS = 8
+# TIME_SLOT_DURATION = 15
 """
-medium example
+medium example | HIGHSCORE: 20
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -72,7 +73,7 @@ to run this faster, run in your terminal
 # WORK_HOURS = 8
 # TIME_SLOT_DURATION = 10
 """
-MEGA example
+MEGA example | HIGHSCORE: 46
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -98,9 +99,71 @@ to run this faster, run in your terminal
 #     }
 # }
 # DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
-# MACHINES = {'Assembly': 12, 'Testing': 12, 'Packaging': 12, 'Loading': 12}
+# MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
 # WORK_HOURS = 12
 # TIME_SLOT_DURATION = 10
+"""
+HEHEHAHA example | HIGHSCORE: 144
+to run this faster, run in your terminal
+`python product_scheduling.py`
+"""
+PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
+PROCESS_TIMES = {
+    'Cookie': {
+        'Assembly': 2,
+        'Testing': 1,
+        'Packaging': 1,
+        'Loading': 1
+    },
+    'EV car': {
+        'Assembly': 10,
+        'Testing': 2,
+        'Packaging': 1,
+        'Loading': 1
+    },
+    'Hose': {
+        'Assembly': 1,
+        'Testing': 2,
+        'Packaging': 2,
+        'Loading': 2
+    },
+    'Plumbus': {
+        'Assembly': 4,
+        'Testing': 5,
+        'Packaging': 2,
+        'Loading': 2
+    },
+    'Bomb': {
+        'Assembly': 1,
+        'Testing': 4,
+        'Packaging': 5,
+        'Loading': 2
+    },
+    'Cake': {
+        'Assembly': 3,
+        'Testing': 1,
+        'Packaging': 2,
+        'Loading': 1
+    },
+    'Bolts': {
+        'Assembly': 1,
+        'Testing': 1,
+        'Packaging': 1,
+        'Loading': 1
+    }
+}
+DEMAND = {
+    'Cookie': 15,
+    'EV car': 10,
+    'Hose': 14,
+    'Plumbus': 7,
+    'Bomb': 7,
+    'Cake': 7,
+    'Bolts': 20
+}
+MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
+WORK_HOURS = 12
+TIME_SLOT_DURATION = 5
 """"""
 """
 variables
@@ -110,8 +173,15 @@ TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
 # genetic algorithmp parameters
 ERROR_PENALTY = 10000
-POP_SIZE = 10000
-CXPB, MUTPB, NGEN = 0.7, 0.2, 50  # crossover probability, mutation probability, and number of generations
+POP_SIZE = 200
+CXPB, MUTPB, NGEN = 0.9, 0.675, 5000  # crossover probability, mutation probability, and number of generations
+TOURNAMENT_SIZE = 5
+
+# # genetic algorithmp parameters
+# ERROR_PENALTY = 10000
+# POP_SIZE = 10000
+# CXPB, MUTPB, NGEN = 0.7, 0.2, 50  # crossover probability, mutation probability, and number of generations
+# TOURNAMENT_SIZE = 5
 
 process_lag = {}
 for pd in PROCESS_TIMES:
@@ -121,16 +191,24 @@ for pd in PROCESS_TIMES:
         for i in range(PROCESSES.index(p)):
             process_lag[pd][p] += PROCESS_TIMES[pd][PROCESSES[i]]
 
+total_products = 0
+for p in DEMAND:
+    total_products += DEMAND[p]
+
+total_machines = 0
+for m in MACHINES:
+    total_machines += MACHINES[m]
+
 
 # random number generator used in creating initial population
-def biased_randint(low, high, bias_factor, processes, process):
+def biased_randint(low, high, processes, process):
     """
     random number generation, generates numbers skewed towards smaller indices
     corresponding to earlier time slots, so time slots are filled more near the front
 
     generate a random number from an exponential distribution
 
-    (processes.index(process) + bias_factor * 1.7) / len(processes)
+    (processes.index(process) + 10 / total_products) / len(processes), 1)
     based on the process index, i.e. the order of the process, numbers are generated in that percentage range
     exp.
         PROCESSES = ['Assembly', 'Testing', 'Packaging']
@@ -141,23 +219,21 @@ def biased_randint(low, high, bias_factor, processes, process):
             'Packaging' 100% of the range
         
         Looking at example of 'Assembly',
-            processes.index(process) + bias_factor * 1.7
-                = 0 + 0.98 * 1.7
-                = 1.666
+            processes.index(process) + 10 / total_products
+                = 0 + 10/30
+                = 0.33
             
             len(processes)
                 = 3
 
-            1.666 / 3 = 0.555333...
+            0.33 / 3 = 0.11
 
-        Scale factor of 1.7 was used to increase the space that is explored by the initial population.
-        
-        To avoid numbers greater than 1 being generated & avoid saturation of the last process near the ending indices,
-        a min() function is used, so that the alpha value caps at 0.98 (bias_factor)
+        skew is noralized by total_products.
+        the less number of total_products, the more normally distributed
+        the more number of total_products, the more right skewed
     """
     skewed_num = random.betavariate(
-        min((processes.index(process) + bias_factor * 1.7) / len(processes),
-            bias_factor), 1)
+        (processes.index(process) + math.sqrt((total_products* len(PROCESSES)) / total_machines)) / len(processes), 1)
 
     # scale the skewed number to the desired range
     return low + int(skewed_num * (high - low))
@@ -179,9 +255,12 @@ def create_individual():
                 machine = random.randint(0, MACHINES[process] - 1)
 
                 highest_index = TIME_SLOTS - PROCESS_TIMES[product][process]
-                # time_slot = random.randint(0, highest_index)
-                time_slot = biased_randint(0, highest_index, 0.98, PROCESSES,
-                                           process)
+
+                # time_slot = random.randint(process_lag[product][process],
+                #                           highest_index)
+
+                time_slot = biased_randint(process_lag[product][process],
+                                           highest_index, PROCESSES, process)
 
                 schedule.append((product, process, machine, time_slot))
     return schedule
@@ -249,9 +328,6 @@ def evaluate(individual):
 
             prev_time = start_time
 
-        if (products_waiting == 0):
-            products_waiting = 10
-
         ###
         """
         check if there are available product from the previous steps
@@ -306,13 +382,16 @@ def evaluate(individual):
         motivation of this fitness score is to encourage earlier spots to be filled in first
         """
         # for ts in range(max(0, start_time - duration), start_time):
-        for ts in range(0, start_time):
+        for ts in range(process_lag[product][process], start_time):
             for i in range(MACHINES[process]):
                 if (machine_state[process][ts][i] == 0):
                     empty_machines += 1
 
         # list of end times, [0, 0, 2, 3, 0]
         end_times[end_time] = max(end_times[end_time], end_time + 1)
+
+    if (products_waiting == 0 and penalty != 0):
+        products_waiting = penalty / 10000
 
     makespan = max(end_times)
     makespan += penalty
@@ -357,11 +436,11 @@ def cxSelectiveTwoPoint(ind1, ind2):
         product1, process1, machine1, time_slot1 = ind1[i]
         product2, process2, machine2, time_slot2 = ind2[i]
 
-        if swappb < 0.7:
+        if swappb < 0.6:
             # swap `time_slot` values only
             ind1[i] = (product1, process1, machine1, time_slot2)
             ind2[i] = (product2, process2, machine2, time_slot1)
-        elif swappb < 0.75:
+        elif swappb < 0.95:
             # swap `machine` values only
             ind1[i] = (product1, process1, machine2, time_slot1)
             ind2[i] = (product2, process2, machine1, time_slot2)
@@ -373,21 +452,45 @@ def cxSelectiveTwoPoint(ind1, ind2):
     return ind1, ind2
 
 
-def mutate(individual, indpb=0.05):
+def mutate(individual, indpb):
     for i in range(len(individual)):
         # unpack the current schedule entry
         product, process, machine, time_slot = individual[i]
 
         # apply mutation based on the probability `indpb`
-        if random.random() < indpb * (MACHINES[process] - 1):
+        if random.random() < indpb:
+            """
+            20 % for randomly distributing machines, initially to converge at a valid configuration
+            40 % for both moving the machine up or down by 1, encourage vertical movement
+            """
             # mutate the machine assignment
-            machine = random.randint(0, MACHINES[process] - 1)
+            pb = random.random()
+            if pb < 0.2:
+                machine = random.randint(0, MACHINES[process] - 1)
+            elif pb < 0.6:
+                machine = (machine - 1) % MACHINES[process]
+            else:
+                machine = (machine + 1) % MACHINES[process]
 
         if random.random() < indpb:
-            # mutate the time slot
-            time_slot = random.randint(
-                process_lag[product][process],
-                TIME_SLOTS - PROCESS_TIMES[product][process])
+            """
+            10 % for randomly distributing time slots, initially to converge at a valid configuration
+            45 % for both moving the time slot up or down by 1, encourage horizontal movement
+            """
+            # mutate the time slot assignment
+            pb = random.random()
+            if pb < 0.1:
+                time_slot = random.randint(
+                    process_lag[product][process],
+                    TIME_SLOTS - PROCESS_TIMES[product][process])
+            elif pb < 0.55:
+                time_slot = max(
+                    time_slot - 1,
+                    process_lag[product][process],
+                )
+            else:
+                time_slot = min(time_slot + 1,
+                                TIME_SLOTS - PROCESS_TIMES[product][process])
 
         # update the individual's schedule with the mutated values
         individual[i] = (product, process, machine, time_slot)
@@ -398,7 +501,7 @@ def mutate(individual, indpb=0.05):
 toolbox.register("evaluate", evaluate)
 toolbox.register("mate", cxSelectiveTwoPoint)
 toolbox.register("mutate", mutate, indpb=0.1)
-toolbox.register("select", tools.selTournament, tournsize=5)
+toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
 from colorama import Fore  # for color text in terminal/notebook
 
@@ -553,7 +656,7 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('log.txt', 'w+') as f:
+    with open('result.txt', 'w+') as f:
         f.write(write_str)
         f.close()
 
@@ -564,8 +667,8 @@ def main():
     hof = tools.HallOfFame(1)
 
     stats = tools.Statistics(lambda ind: ind.fitness.values)
-    stats.register("avg", np.mean, axis=0)
     stats.register("min", np.min, axis=0)
+    stats.register("avg", np.mean, axis=0)
     stats.register("max", np.max, axis=0)
 
     pop, log = algorithms.eaSimple(pop,
@@ -590,6 +693,10 @@ if __name__ == '__main__':
     # main driver
     pop, log, hof = main()
     best_ind = hof.items[0]
+
+    # with open('result.txt', 'w+') as f:
+    #     f.write(log)
+    #     f.close()
 
     # output results
     printSchedule(best_ind)
