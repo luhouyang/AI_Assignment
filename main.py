@@ -2,6 +2,7 @@
 import random
 import numpy as np
 import multiprocessing
+from objproxies import CallbackProxy
 from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io/en/master/
 
 # uncomment cases to test the algorithm
@@ -76,93 +77,93 @@ MEGA example | HIGHSCORE: 36
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
-PROCESS_TIMES = {
-    'Product 1': {
-        'Assembly': 2,
-        'Testing': 1,
-        'Packaging': 1,
-        'Loading': 1
-    },
-    'Product 2': {
-        'Assembly': 3,
-        'Testing': 2,
-        'Packaging': 1,
-        'Loading': 1
-    },
-    'Product 3': {
-        'Assembly': 1,
-        'Testing': 2,
-        'Packaging': 2,
-        'Loading': 2
-    }
-}
-DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
-MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
-WORK_HOURS = 12
-TIME_SLOT_DURATION = 10
-"""
-HEHEHAHA example | HIGHSCORE: 131
-to run this faster, run in your terminal
-`python product_scheduling.py`
-"""
 # PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
 # PROCESS_TIMES = {
-#     'Cookie': {
+#     'Product 1': {
 #         'Assembly': 2,
 #         'Testing': 1,
 #         'Packaging': 1,
 #         'Loading': 1
 #     },
-#     'EV car': {
-#         'Assembly': 10,
-#         'Testing': 2,
-#         'Packaging': 1,
-#         'Loading': 1
-#     },
-#     'Hose': {
-#         'Assembly': 1,
-#         'Testing': 2,
-#         'Packaging': 2,
-#         'Loading': 2
-#     },
-#     'Plumbus': {
-#         'Assembly': 4,
-#         'Testing': 5,
-#         'Packaging': 2,
-#         'Loading': 2
-#     },
-#     'Bomb': {
-#         'Assembly': 1,
-#         'Testing': 4,
-#         'Packaging': 5,
-#         'Loading': 2
-#     },
-#     'Cake': {
+#     'Product 2': {
 #         'Assembly': 3,
-#         'Testing': 1,
-#         'Packaging': 2,
-#         'Loading': 1
-#     },
-#     'Bolts': {
-#         'Assembly': 1,
-#         'Testing': 1,
+#         'Testing': 2,
 #         'Packaging': 1,
 #         'Loading': 1
+#     },
+#     'Product 3': {
+#         'Assembly': 1,
+#         'Testing': 2,
+#         'Packaging': 2,
+#         'Loading': 2
 #     }
 # }
-# DEMAND = {
-#     'Cookie': 15,
-#     'EV car': 10,
-#     'Hose': 14,
-#     'Plumbus': 7,
-#     'Bomb': 7,
-#     'Cake': 7,
-#     'Bolts': 20
-# }
-# MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
+# DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+# MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
 # WORK_HOURS = 12
-# TIME_SLOT_DURATION = 5
+# TIME_SLOT_DURATION = 10
+"""
+HEHEHAHA example | HIGHSCORE: 121
+to run this faster, run in your terminal
+`python product_scheduling.py`
+"""
+PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
+PROCESS_TIMES = {
+    'Cookie': {
+        'Assembly': 2,
+        'Testing': 1,
+        'Packaging': 1,
+        'Loading': 1
+    },
+    'EV car': {
+        'Assembly': 10,
+        'Testing': 2,
+        'Packaging': 1,
+        'Loading': 1
+    },
+    'Hose': {
+        'Assembly': 1,
+        'Testing': 2,
+        'Packaging': 2,
+        'Loading': 2
+    },
+    'Plumbus': {
+        'Assembly': 4,
+        'Testing': 5,
+        'Packaging': 2,
+        'Loading': 2
+    },
+    'Bomb': {
+        'Assembly': 1,
+        'Testing': 4,
+        'Packaging': 5,
+        'Loading': 2
+    },
+    'Cake': {
+        'Assembly': 3,
+        'Testing': 1,
+        'Packaging': 2,
+        'Loading': 1
+    },
+    'Bolts': {
+        'Assembly': 1,
+        'Testing': 1,
+        'Packaging': 1,
+        'Loading': 1
+    }
+}
+DEMAND = {
+    'Cookie': 15,
+    'EV car': 10,
+    'Hose': 14,
+    'Plumbus': 7,
+    'Bomb': 7,
+    'Cake': 7,
+    'Bolts': 20
+}
+MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
+WORK_HOURS = 12
+TIME_SLOT_DURATION = 5
 ###
 """
 variables
@@ -170,21 +171,25 @@ variables
 # total time slots available per day
 TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
-# # genetic algorithmp parameters
-# ERROR_PENALTY = 10000
-# POP_SIZE = 200
-# CXPB, MUTPB, NGEN = 0.9, 0.675, 5000  # crossover probability, mutation probability, and number of generations
-# TOURNAMENT_SIZE = 5
+# genetic algorithmp parameters
+ERROR_PENALTY = 10000
+POP_SIZE = 200
+CXPB, MUTPB, NGEN = 0.95, 0.675, 10000  # crossover probability, mutation probability, and number of generations
+TOURNAMENT_SIZE = 5
+N_EVALS = 0
+N_GENS = 0
 
 # genetic algorithmp parameters
 """
 problem is characterized by a need for mutation parameter to be higher as search space increases.
 however, mutation levels should drops as the search converges.
 """
-ERROR_PENALTY = 10000
-POP_SIZE = 50
-CXPB, MUTPB, NGEN = 0.95, 0.35, 10000  # crossover probability, mutation probability, and number of generations
-TOURNAMENT_SIZE = 3
+# ERROR_PENALTY = 10000
+# POP_SIZE = 50
+# CXPB, MUTPB, NGEN = 0.95, 0.1, 10000  # crossover probability, mutation probability, and number of generations
+# TOURNAMENT_SIZE = 3
+# N_EVALS = 0
+# N_GENS = 0
 
 process_lag = {}
 for pd in PROCESS_TIMES:
@@ -238,6 +243,11 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 # fitness function to minimize makespan
 def evaluate(individual):
+    # global N_EVALS, N_GENS
+    # N_EVALS += 1
+    # if N_EVALS % POP_SIZE == 0:
+    #     N_GENS += 1
+
     # used to hold penalty when process occur before previous process is done
     penalty = 0
 
@@ -492,8 +502,8 @@ def mutate(individual, indpb):
 
 
 toolbox.register("evaluate", evaluate)
-# toolbox.register("mate", cxSelectiveTwoPoint)
-toolbox.register("mate", cxSelectiveOnePoint)
+toolbox.register("mate", cxSelectiveTwoPoint)
+# toolbox.register("mate", cxSelectiveOnePoint)
 toolbox.register("mutate", mutate, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
@@ -673,6 +683,15 @@ def main():
                                    stats=stats,
                                    halloffame=hof,
                                    verbose=True)
+
+    # pop, log = algorithms.eaSimple(pop,
+    #                                toolbox,
+    #                                cxpb=CallbackProxy(lambda: max(5.0 * N_GENS / NGEN - 0.05, 0.1)),
+    #                                mutpb=CallbackProxy(lambda: max(0.675 * (NGEN - N_GENS) / NGEN, 0.1)),
+    #                                ngen=NGEN,
+    #                                stats=stats,
+    #                                halloffame=hof,
+    #                                verbose=True)
 
     return pop, log, hof
 
