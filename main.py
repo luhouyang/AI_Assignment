@@ -27,23 +27,23 @@ simple example | HIGHSCORE: 14
 # to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-PROCESSES = ['Assembly', 'Testing', 'Packaging']
-PROCESS_TIMES = {
-    'Product 1': {
-        'Assembly': 2,
-        'Testing': 1,
-        'Packaging': 1
-    },  # time slots required
-    'Product 2': {
-        'Assembly': 3,
-        'Testing': 2,
-        'Packaging': 1
-    }
-}
-DEMAND = {'Product 1': 5, 'Product 2': 4}
-MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
-WORK_HOURS = 8
-TIME_SLOT_DURATION = 15
+# PROCESSES = ['Assembly', 'Testing', 'Packaging']
+# PROCESS_TIMES = {
+#     'Product 1': {
+#         'Assembly': 2,
+#         'Testing': 1,
+#         'Packaging': 1
+#     },  # time slots required
+#     'Product 2': {
+#         'Assembly': 3,
+#         'Testing': 2,
+#         'Packaging': 1
+#     }
+# }
+# DEMAND = {'Product 1': 5, 'Product 2': 4}
+# MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
+# WORK_HOURS = 8
+# TIME_SLOT_DURATION = 15
 """
 medium example | HIGHSCORE: 20
 to run this faster, run in your terminal
@@ -76,31 +76,31 @@ MEGA example | HIGHSCORE: 36
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-# PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
-# PROCESS_TIMES = {
-#     'Product 1': {
-#         'Assembly': 2,
-#         'Testing': 1,
-#         'Packaging': 1,
-#         'Loading': 1
-#     },
-#     'Product 2': {
-#         'Assembly': 3,
-#         'Testing': 2,
-#         'Packaging': 1,
-#         'Loading': 1
-#     },
-#     'Product 3': {
-#         'Assembly': 1,
-#         'Testing': 2,
-#         'Packaging': 2,
-#         'Loading': 2
-#     }
-# }
-# DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
-# MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
-# WORK_HOURS = 12
-# TIME_SLOT_DURATION = 10
+PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
+PROCESS_TIMES = {
+    'Product 1': {
+        'Assembly': 2,
+        'Testing': 1,
+        'Packaging': 1,
+        'Loading': 1
+    },
+    'Product 2': {
+        'Assembly': 3,
+        'Testing': 2,
+        'Packaging': 1,
+        'Loading': 1
+    },
+    'Product 3': {
+        'Assembly': 1,
+        'Testing': 2,
+        'Packaging': 2,
+        'Loading': 2
+    }
+}
+DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
+WORK_HOURS = 12
+TIME_SLOT_DURATION = 10
 """
 HEHEHAHA example | HIGHSCORE: 131
 to run this faster, run in your terminal
@@ -170,17 +170,21 @@ variables
 # total time slots available per day
 TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
-# genetic algorithmp parameters
-ERROR_PENALTY = 10000
-POP_SIZE = 200
-CXPB, MUTPB, NGEN = 0.9, 0.675, 5000  # crossover probability, mutation probability, and number of generations
-TOURNAMENT_SIZE = 5
-
 # # genetic algorithmp parameters
 # ERROR_PENALTY = 10000
-# POP_SIZE = 10000
-# CXPB, MUTPB, NGEN = 0.7, 0.2, 50  # crossover probability, mutation probability, and number of generations
+# POP_SIZE = 200
+# CXPB, MUTPB, NGEN = 0.9, 0.675, 5000  # crossover probability, mutation probability, and number of generations
 # TOURNAMENT_SIZE = 5
+
+# genetic algorithmp parameters
+"""
+problem is characterized by a need for mutation parameter to be higher as search space increases.
+however, mutation levels should drops as the search converges.
+"""
+ERROR_PENALTY = 10000
+POP_SIZE = 50
+CXPB, MUTPB, NGEN = 0.95, 0.35, 10000  # crossover probability, mutation probability, and number of generations
+TOURNAMENT_SIZE = 3
 
 process_lag = {}
 for pd in PROCESS_TIMES:
@@ -413,6 +417,34 @@ def cxSelectiveTwoPoint(ind1, ind2):
     return ind1, ind2
 
 
+def cxSelectiveOnePoint(ind1, ind2):
+    # choose crossover points
+    size = len(ind1)
+    cxpoint = random.randint(0, size - 1)
+
+    # swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
+    swappb = random.randint(0, 1)
+
+    # keep `product` and `process` constant
+    product1, process1, machine1, time_slot1 = ind1[cxpoint]
+    product2, process2, machine2, time_slot2 = ind2[cxpoint]
+
+    if swappb < 0.6:
+        # swap `time_slot` values only
+        ind1[cxpoint] = (product1, process1, machine1, time_slot2)
+        ind2[cxpoint] = (product2, process2, machine2, time_slot1)
+    elif swappb < 0.95:
+        # swap `machine` values only
+        ind1[cxpoint] = (product1, process1, machine2, time_slot1)
+        ind2[i] = (product2, process2, machine1, time_slot2)
+    else:
+        # swap `machine` and `time_slot` values only
+        ind1[cxpoint] = (product1, process1, machine2, time_slot2)
+        ind2[cxpoint] = (product2, process2, machine1, time_slot1)
+
+    return ind1, ind2
+
+
 def mutate(individual, indpb):
     for i in range(len(individual)):
         # unpack the current schedule entry
@@ -460,7 +492,8 @@ def mutate(individual, indpb):
 
 
 toolbox.register("evaluate", evaluate)
-toolbox.register("mate", cxSelectiveTwoPoint)
+# toolbox.register("mate", cxSelectiveTwoPoint)
+toolbox.register("mate", cxSelectiveOnePoint)
 toolbox.register("mutate", mutate, indpb=0.1)
 toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
