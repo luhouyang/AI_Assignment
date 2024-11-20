@@ -50,28 +50,28 @@ medium example | HIGHSCORE: 20
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-# PROCESSES = ['Assembly', 'Testing', 'Packaging']
-# PROCESS_TIMES = {
-#     'Product 1': {
-#         'Assembly': 2,
-#         'Testing': 1,
-#         'Packaging': 1
-#     },
-#     'Product 2': {
-#         'Assembly': 3,
-#         'Testing': 2,
-#         'Packaging': 1
-#     },
-#     'Product 3': {
-#         'Assembly': 1,
-#         'Testing': 2,
-#         'Packaging': 2
-#     }
-# }
-# DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
-# MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
-# WORK_HOURS = 8
-# TIME_SLOT_DURATION = 10
+PROCESSES = ['Assembly', 'Testing', 'Packaging']
+PROCESS_TIMES = {
+    'Product 1': {
+        'Assembly': 2,
+        'Testing': 1,
+        'Packaging': 1
+    },
+    'Product 2': {
+        'Assembly': 3,
+        'Testing': 2,
+        'Packaging': 1
+    },
+    'Product 3': {
+        'Assembly': 1,
+        'Testing': 2,
+        'Packaging': 2
+    }
+}
+DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
+WORK_HOURS = 8
+TIME_SLOT_DURATION = 10
 """
 MEGA example | HIGHSCORE: 36
 to run this faster, run in your terminal
@@ -107,63 +107,63 @@ HEHEHAHA example | HIGHSCORE: 121
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
-PROCESS_TIMES = {
-    'Cookie': {
-        'Assembly': 2,
-        'Testing': 1,
-        'Packaging': 1,
-        'Loading': 1
-    },
-    'EV car': {
-        'Assembly': 10,
-        'Testing': 2,
-        'Packaging': 1,
-        'Loading': 1
-    },
-    'Hose': {
-        'Assembly': 1,
-        'Testing': 2,
-        'Packaging': 2,
-        'Loading': 2
-    },
-    'Plumbus': {
-        'Assembly': 4,
-        'Testing': 5,
-        'Packaging': 2,
-        'Loading': 2
-    },
-    'Bomb': {
-        'Assembly': 1,
-        'Testing': 4,
-        'Packaging': 5,
-        'Loading': 2
-    },
-    'Cake': {
-        'Assembly': 3,
-        'Testing': 1,
-        'Packaging': 2,
-        'Loading': 1
-    },
-    'Bolts': {
-        'Assembly': 1,
-        'Testing': 1,
-        'Packaging': 1,
-        'Loading': 1
-    }
-}
-DEMAND = {
-    'Cookie': 15,
-    'EV car': 10,
-    'Hose': 14,
-    'Plumbus': 7,
-    'Bomb': 7,
-    'Cake': 7,
-    'Bolts': 20
-}
-MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
-WORK_HOURS = 12
-TIME_SLOT_DURATION = 5
+# PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
+# PROCESS_TIMES = {
+#     'Cookie': {
+#         'Assembly': 2,
+#         'Testing': 1,
+#         'Packaging': 1,
+#         'Loading': 1
+#     },
+#     'EV car': {
+#         'Assembly': 10,
+#         'Testing': 2,
+#         'Packaging': 1,
+#         'Loading': 1
+#     },
+#     'Hose': {
+#         'Assembly': 1,
+#         'Testing': 2,
+#         'Packaging': 2,
+#         'Loading': 2
+#     },
+#     'Plumbus': {
+#         'Assembly': 4,
+#         'Testing': 5,
+#         'Packaging': 2,
+#         'Loading': 2
+#     },
+#     'Bomb': {
+#         'Assembly': 1,
+#         'Testing': 4,
+#         'Packaging': 5,
+#         'Loading': 2
+#     },
+#     'Cake': {
+#         'Assembly': 3,
+#         'Testing': 1,
+#         'Packaging': 2,
+#         'Loading': 1
+#     },
+#     'Bolts': {
+#         'Assembly': 1,
+#         'Testing': 1,
+#         'Packaging': 1,
+#         'Loading': 1
+#     }
+# }
+# DEMAND = {
+#     'Cookie': 15,
+#     'EV car': 10,
+#     'Hose': 14,
+#     'Plumbus': 7,
+#     'Bomb': 7,
+#     'Cake': 7,
+#     'Bolts': 20
+# }
+# MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
+# WORK_HOURS = 12
+# TIME_SLOT_DURATION = 5
 ###
 """
 variables
@@ -173,11 +173,11 @@ TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
 # genetic algorithmp parameters
 ERROR_PENALTY = 10000
-POP_SIZE = 200
-CXPB, MUTPB, NGEN = 0.95, 0.675, 10000  # crossover probability, mutation probability, and number of generations
-TOURNAMENT_SIZE = 5
-N_EVALS = 0
-N_GENS = 0
+# POP_SIZE = 200
+# CXPB, MUTPB, NGEN = 0.95, 0.675, 5000  # crossover probability, mutation probability, and number of generations
+# TOURNAMENT_SIZE = 5
+# N_EVALS = 0
+# N_GENS = 0
 
 # genetic algorithmp parameters
 """
@@ -501,11 +501,11 @@ def mutate(individual, indpb):
     return (individual, )
 
 
-toolbox.register("evaluate", evaluate)
-toolbox.register("mate", cxSelectiveTwoPoint)
-# toolbox.register("mate", cxSelectiveOnePoint)
-toolbox.register("mutate", mutate, indpb=0.1)
-toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+# toolbox.register("evaluate", evaluate)
+# toolbox.register("mate", cxSelectiveTwoPoint)
+# # toolbox.register("mate", cxSelectiveOnePoint)
+# toolbox.register("mutate", mutate, indpb=0.1)
+# toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
 from colorama import Fore  # for color text in terminal/notebook
 
@@ -514,7 +514,7 @@ from colorama import Fore  # for color text in terminal/notebook
 def printSchedule(schedule):
     write_str = ''
 
-    makespan = evaluate(schedule)[0]
+    makespan, empty_machine, products_waiting = evaluate(schedule)
 
     schedule = sorted(schedule, key=lambda x: x[3])
 
@@ -664,6 +664,55 @@ def printSchedule(schedule):
         f.write(write_str)
         f.close()
 
+    if (MODE == 'cx'):
+        with open('crossover_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('crossover_medium.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
+
+    elif (MODE == 'mu'):
+        with open('mutation_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('mutation_medium.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
+
+    elif (MODE == 'ngen'):
+        with open('ngen_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('ngen_medium.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
+
+    elif (MODE == 'pop'):
+        with open('pop_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('pop_medium.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
+
+    elif (MODE == 'tourn'):
+        with open('tourn_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('tourn_medium.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
 
 def main():
     random.seed(42)
@@ -703,12 +752,84 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(cpu_count)
     toolbox.register("map", pool.map)
 
-    # main driver
-    pop, log, hof = main()
-    best_ind = hof.items[0]
+    POP_SIZE = 200
+    CXPB, MUTPB, NGEN = 0.95, 0.675, 5000  # crossover probability, mutation probability, and number of generations
+    TOURNAMENT_SIZE = 5
 
-    # output results
-    printSchedule(best_ind)
+    toolbox.register("evaluate", evaluate)
+    toolbox.register("mate", cxSelectiveTwoPoint)
+    # toolbox.register("mate", cxSelectiveOnePoint)
+    toolbox.register("mutate", mutate, indpb=0.1)
+    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+
+    # # main driver
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+
+    # # output results
+    # printSchedule(best_ind)
+
+    MODE = 'cx'
+    for i in range(95):
+        # main driver
+        pop, log, hof = main()
+        best_ind = hof.items[0]
+
+        # output results
+        printSchedule(best_ind)
+
+        CXPB -= 0.01
+
+    MODE = 'mu'
+    CXPB = 0.95
+    for i in range(67):
+        # main driver
+        pop, log, hof = main()
+        best_ind = hof.items[0]
+
+        # output results
+        printSchedule(best_ind)
+
+        MUTPB -= 0.01
+
+    MODE = 'ngen'
+    MUTPB = 0.675
+    NGEN = 250
+    for i in range(39):
+        # main driver
+        pop, log, hof = main()
+        best_ind = hof.items[0]
+
+        # output results
+        printSchedule(best_ind)
+
+        NGEN += 250
+
+    MODE = 'pop'
+    NGEN = 5000
+    POP_SIZE = 50
+    for i in range(19):
+        # main driver
+        pop, log, hof = main()
+        best_ind = hof.items[0]
+
+        # output results
+        printSchedule(best_ind)
+
+        POP_SIZE += 50
+
+    MODE = 'tourn'
+    POP_SIZE = 200
+    TOURNAMENT_SIZE = 1
+    for i in range(9):
+        # main driver
+        pop, log, hof = main()
+        best_ind = hof.items[0]
+
+        # output results
+        printSchedule(best_ind)
+
+        TOURNAMENT_SIZE += 1
 
     pool.close()
 
