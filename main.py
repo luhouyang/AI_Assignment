@@ -71,7 +71,7 @@ PROCESS_TIMES = {
 DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
 MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
-TIME_SLOT_DURATION = 10 # minutes
+TIME_SLOT_DURATION = 10  # minutes
 """
 MEGA example | HIGHSCORE: 36
 to run this faster, run in your terminal
@@ -190,7 +190,6 @@ however, mutation levels should drops as the search converges.
 # TOURNAMENT_SIZE = 3
 # N_EVALS = 0
 # N_GENS = 0
-
 """
 find the earliest time that a process can be in
 example:
@@ -253,7 +252,6 @@ toolbox.register("individual", tools.initIterate, creator.Individual,
                  create_individual)
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
-
 # fitness function to minimize makespan
 """
 PSEUDOCODE
@@ -279,6 +277,8 @@ PSEUDOCODE
 20. MAKESPAN = max(END_TIMES) + PENALTY
 21. RETURN MAKESPAN, EMPTY_MACHINE, PRODUCTS_WAITING
 """
+
+
 def evaluate(individual):
     # global N_EVALS, N_GENS
     # N_EVALS += 1
@@ -430,6 +430,17 @@ def evaluate(individual):
     return (makespan, empty_machines, products_waiting)
 
 
+"""
+PSEUDOCODE
+1. INITIALIZE SIZE = length of individual process list
+2. SELECT 2 random integers in between 1 and (SIZE - 1) and set to POINT_1 and POINT_2
+3. SWAP the intergers IF the POINT_1 is greter than POINT_2
+4. FROM POINT_1 to POINT_2:
+5.      SWAP only TIME_SLOT values, only MACHINE number or BOTH values based on random probability
+6. RETURN both individuals
+"""
+
+
 def cxSelectiveTwoPoint(ind1, ind2):
     # choose crossover points
     size = len(ind1)
@@ -490,6 +501,17 @@ def cxSelectiveOnePoint(ind1, ind2):
         ind2[cxpoint] = (product2, process2, machine1, time_slot1)
 
     return ind1, ind2
+
+
+"""
+PSEUDOCODE
+1. FOR EACH process in the individual:
+2.      IF random probability < MUTATION_RATE:
+3.          EITHER MUTATE by randomly assigning MACHINE, INCREMENT or DECREMENT MACHINE index
+4.      IF random pobability < MUTATION_RATE:
+5.          EITHER MUTATE by randomly assigning TIME_SLOT, INCREMENT or DECREMENT TIME_SLOT index
+6. RETURN individual
+"""
 
 
 def mutate(individual, indpb):
