@@ -178,18 +178,6 @@ ERROR_PENALTY = 10000
 # TOURNAMENT_SIZE = 5
 # N_EVALS = 0
 # N_GENS = 0
-
-# genetic algorithmp parameters
-"""
-problem is characterized by a need for mutation parameter to be higher as search space increases.
-however, mutation levels should drops as the search converges.
-"""
-# ERROR_PENALTY = 10000
-# POP_SIZE = 50
-# CXPB, MUTPB, NGEN = 0.95, 0.1, 10000  # crossover probability, mutation probability, and number of generations
-# TOURNAMENT_SIZE = 3
-# N_EVALS = 0
-# N_GENS = 0
 """
 find the earliest time that a process can be in
 example:
