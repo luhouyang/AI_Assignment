@@ -46,7 +46,7 @@ simple example | HIGHSCORE: 14
 # WORK_HOURS = 8
 # TIME_SLOT_DURATION = 15
 """
-medium example | HIGHSCORE: 20
+medium example | HIGHSCORE: 16
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -71,7 +71,7 @@ PROCESS_TIMES = {
 DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
 MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
-TIME_SLOT_DURATION = 10
+TIME_SLOT_DURATION = 10 # minutes
 """
 MEGA example | HIGHSCORE: 36
 to run this faster, run in your terminal
@@ -191,6 +191,19 @@ however, mutation levels should drops as the search converges.
 # N_EVALS = 0
 # N_GENS = 0
 
+"""
+find the earliest time that a process can be in
+example:
+    'Product 1': {
+        'Assembly': 2,
+        'Testing': 1,
+        'Packaging': 1,
+    },
+
+    Hence, earliest possible time for 'Assembly' is time slot 1
+    earliest possible time for 'Testing' is time slot 3, (1 + 2)
+    earliest possible time for 'Packaging' is time slot 4, (1 + 2 + 1)
+"""
 process_lag = {}
 for pd in PROCESS_TIMES:
     process_lag[pd] = {}
@@ -242,6 +255,30 @@ toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 
 # fitness function to minimize makespan
+"""
+PSEUDOCODE
+1. Initialize PENALTY=0, END_TIMES=[], EMPTY_MACHINES=0, PRODUCTS_WAITING=0, COMPLETED=[], MACHINE_STATE=[]
+2. SORT all process in the indivisual according to TIME_SLOT
+3. FOR EACH individual:
+4.      CALCULATE END_TIME = START_TIME + DURATION
+5.      INCREMENT the TIME_SLOT of products that are waiting for next process in COMPLETED
+6.          ADD amount of products that are waiting to PRODUCTS_WAITING
+7.      IF there is product that has completed previous process:
+8.          DECREMENT the product from COMPLETED
+9.      ELSE:
+10.          ADD 10000 to PENALTY
+11.     IF machine in current TIME_SLOT is not occupied (i.e. 0):
+12.         UPDATE MACHINE_STATE at TIME_SLOT with 1
+13.     ELSE:
+14.         ADD 10000 to PENALTY
+15.     FROM PRODUCT_LAG to END_TIME:
+16.         IF MACHINE_STATE for the process equal 0:
+17.             EMPTY_MACHINES += 1
+18.     UPDATE END_TIMES list with END_TIME
+19. REPEAT FOR all processes in individual
+20. MAKESPAN = max(END_TIMES) + PENALTY
+21. RETURN MAKESPAN, EMPTY_MACHINE, PRODUCTS_WAITING
+"""
 def evaluate(individual):
     # global N_EVALS, N_GENS
     # N_EVALS += 1
@@ -670,7 +707,7 @@ def printSchedule(schedule):
             f.close()
 
         with open('crossover_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
@@ -680,7 +717,7 @@ def printSchedule(schedule):
             f.close()
 
         with open('mutation_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
@@ -690,7 +727,7 @@ def printSchedule(schedule):
             f.close()
 
         with open('ngen_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
@@ -700,7 +737,7 @@ def printSchedule(schedule):
             f.close()
 
         with open('pop_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
@@ -710,12 +747,14 @@ def printSchedule(schedule):
             f.close()
 
         with open('tourn_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MUTPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
+
 def main():
-    random.seed(42)
+    # random.seed(42)
+    random.seed(10)
     pop = toolbox.population(n=POP_SIZE)
     hof = tools.HallOfFame(1)
 
@@ -752,14 +791,16 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(cpu_count)
     toolbox.register("map", pool.map)
 
-    POP_SIZE = 200
-    CXPB, MUTPB, NGEN = 0.95, 0.675, 5000  # crossover probability, mutation probability, and number of generations
+    POP_SIZE = 100
+    # crossover probability, mutation probability (population percentage), and number of generations
+    CXPB, MUTPB, NGEN = 0.7, 0.5, 4000  # MUTPB is kept constant
+    MU_INDPB = 0.03  # individual mutation probability
     TOURNAMENT_SIZE = 5
 
     toolbox.register("evaluate", evaluate)
     toolbox.register("mate", cxSelectiveTwoPoint)
     # toolbox.register("mate", cxSelectiveOnePoint)
-    toolbox.register("mutate", mutate, indpb=0.1)
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
     # # main driver
@@ -769,67 +810,71 @@ if __name__ == '__main__':
     # # output results
     # printSchedule(best_ind)
 
-    MODE = 'cx'
-    for i in range(95):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
+    for i in range(3):
+        MODE = 'cx'
+        TOURNAMENT_SIZE = 5
+        CXPB = 0.95
+        for i in range(95):
+            # main driver
+            pop, log, hof = main()
+            best_ind = hof.items[0]
 
-        # output results
-        printSchedule(best_ind)
+            # output results
+            printSchedule(best_ind)
 
-        CXPB -= 0.01
+            CXPB -= 0.01
 
-    MODE = 'mu'
-    CXPB = 0.95
-    for i in range(67):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
+        MODE = 'mu'
+        CXPB = 0.7
+        MU_INDPB = 0.01
+        for i in range(49):
+            # main driver
+            pop, log, hof = main()
+            best_ind = hof.items[0]
 
-        # output results
-        printSchedule(best_ind)
+            # output results
+            printSchedule(best_ind)
 
-        MUTPB -= 0.01
+            MU_INDPB += 0.01
 
-    MODE = 'ngen'
-    MUTPB = 0.675
-    NGEN = 250
-    for i in range(39):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
+        MODE = 'ngen'
+        MU_INDPB = 0.03
+        NGEN = 250
+        for i in range(39):
+            # main driver
+            pop, log, hof = main()
+            best_ind = hof.items[0]
 
-        # output results
-        printSchedule(best_ind)
+            # output results
+            printSchedule(best_ind)
 
-        NGEN += 250
+            NGEN += 250
 
-    MODE = 'pop'
-    NGEN = 5000
-    POP_SIZE = 50
-    for i in range(19):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
+        MODE = 'pop'
+        NGEN = 4000
+        POP_SIZE = 25
+        for i in range(39):
+            # main driver
+            pop, log, hof = main()
+            best_ind = hof.items[0]
 
-        # output results
-        printSchedule(best_ind)
+            # output results
+            printSchedule(best_ind)
 
-        POP_SIZE += 50
+            POP_SIZE += 25
 
-    MODE = 'tourn'
-    POP_SIZE = 200
-    TOURNAMENT_SIZE = 1
-    for i in range(9):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
+        MODE = 'tourn'
+        POP_SIZE = 100
+        TOURNAMENT_SIZE = 1
+        for i in range(9):
+            # main driver
+            pop, log, hof = main()
+            best_ind = hof.items[0]
 
-        # output results
-        printSchedule(best_ind)
+            # output results
+            printSchedule(best_ind)
 
-        TOURNAMENT_SIZE += 1
+            TOURNAMENT_SIZE += 1
 
     pool.close()
 
