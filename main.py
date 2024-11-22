@@ -56,7 +56,7 @@ MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
 TIME_SLOT_DURATION = 10  # minutes
 """
-Mega example | HIGHSCORE: 36
+Mega example | HIGHSCORE: 27
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """

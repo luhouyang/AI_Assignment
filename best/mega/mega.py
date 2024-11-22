@@ -7,7 +7,7 @@ from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io
 
 # uncomment cases to test the algorithm
 """
-Mega example | HIGHSCORE: 36
+Mega example | HIGHSCORE: 27
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -618,7 +618,7 @@ if __name__ == '__main__':
 
     POP_SIZE = 100
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.85, 0.5, 4000  # MUTPB is kept constant
+    CXPB, MUTPB, NGEN = 0.85, 0.5, 10000  # MUTPB is kept constant
     MU_INDPB = 0.01  # individual mutation probability
     TOURNAMENT_SIZE = 5
 
