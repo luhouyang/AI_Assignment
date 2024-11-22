@@ -2,7 +2,7 @@
 import random
 import numpy as np
 import multiprocessing
-from objproxies import CallbackProxy
+# from objproxies import CallbackProxy
 from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io/en/master/
 
 # uncomment cases to test the algorithm
@@ -46,7 +46,7 @@ simple example | HIGHSCORE: 14
 # WORK_HOURS = 8
 # TIME_SLOT_DURATION = 15
 """
-medium example | HIGHSCORE: 16
+medium example | HIGHSCORE: 15
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -73,7 +73,7 @@ MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
 TIME_SLOT_DURATION = 10  # minutes
 """
-MEGA example | HIGHSCORE: 36
+Mega example | HIGHSCORE: 36
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -103,7 +103,7 @@ to run this faster, run in your terminal
 # WORK_HOURS = 12
 # TIME_SLOT_DURATION = 10
 """
-HEHEHAHA example | HIGHSCORE: 121
+Largest example | HIGHSCORE: 71
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -212,6 +212,21 @@ creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
+"""
+PSEUDOCODE
+1. INITIALIZE EPS=1.5, SCHEDULE=[]
+2. FOR EACH product:
+3.      FOR EACH process:
+4.          FROM 1 to DEMAND of product:
+5.              machine = RANDOM INT BETWEEN 0 AND (available machines for process - 1)
+6.              CALCULATE TIME_SLOT:
+7.                  lowest_index = PROCESS_LAG of product of process
+8.                  highest_index = TIME_SLOTS - PROCESS_TIMES of product of process
+9.                  extend_range = highest_index * ((index of process + EPS) / number of processes)
+10.                 time_slot = RANDOM INT BETWEEN lowest_index AND MIN(lowest_index + extend_range, highest_index)
+11.             APPEND (product, process, machine, time_slot) to SCHEDULE
+12. RETURN SCHEDULE
+"""
 
 
 # individual generator
@@ -806,6 +821,7 @@ if __name__ == '__main__':
     CXPB, MUTPB, NGEN = 0.7, 0.5, 4000  # MUTPB is kept constant
     MU_INDPB = 0.03  # individual mutation probability
     TOURNAMENT_SIZE = 5
+    MODE = ""
 
     toolbox.register("evaluate", evaluate)
     toolbox.register("mate", cxSelectiveTwoPoint)
@@ -813,78 +829,82 @@ if __name__ == '__main__':
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
-    # # main driver
-    # pop, log, hof = main()
-    # best_ind = hof.items[0]
+    # main driver
+    pop, log, hof = main()
+    best_ind = hof.items[0]
 
-    # # output results
-    # printSchedule(best_ind)
+    # output results
+    printSchedule(best_ind)
 
-    for i in range(3):
-        MODE = 'cx'
-        TOURNAMENT_SIZE = 5
-        CXPB = 0.95
-        for i in range(95):
-            # main driver
-            pop, log, hof = main()
-            best_ind = hof.items[0]
+    # for i in range(3):
+    #     MODE = 'cx'
+    #     TOURNAMENT_SIZE = 5
+    #     CXPB = 0.95
+    #     for i in range(95):
+    #         # main driver
+    #         pop, log, hof = main()
+    #         best_ind = hof.items[0]
 
-            # output results
-            printSchedule(best_ind)
+    #         # output results
+    #         printSchedule(best_ind)
 
-            CXPB -= 0.01
+    #         CXPB -= 0.01
 
-        MODE = 'mu'
-        CXPB = 0.7
-        MU_INDPB = 0.01
-        for i in range(49):
-            # main driver
-            pop, log, hof = main()
-            best_ind = hof.items[0]
+    #     MODE = 'mu'
+    #     CXPB = 0.7
+    #     MU_INDPB = 0.01
+    #     for i in range(49):
+    #         toolbox.register("mutate", mutate, indpb=MU_INDPB)
 
-            # output results
-            printSchedule(best_ind)
+    #         # main driver
+    #         pop, log, hof = main()
+    #         best_ind = hof.items[0]
 
-            MU_INDPB += 0.01
+    #         # output results
+    #         printSchedule(best_ind)
 
-        MODE = 'ngen'
-        MU_INDPB = 0.03
-        NGEN = 250
-        for i in range(39):
-            # main driver
-            pop, log, hof = main()
-            best_ind = hof.items[0]
+    #         MU_INDPB += 0.01
 
-            # output results
-            printSchedule(best_ind)
+    #     MODE = 'ngen'
+    #     MU_INDPB = 0.03
+    #     NGEN = 250
+    #     for i in range(39):
+    #         # main driver
+    #         pop, log, hof = main()
+    #         best_ind = hof.items[0]
 
-            NGEN += 250
+    #         # output results
+    #         printSchedule(best_ind)
 
-        MODE = 'pop'
-        NGEN = 4000
-        POP_SIZE = 25
-        for i in range(39):
-            # main driver
-            pop, log, hof = main()
-            best_ind = hof.items[0]
+    #         NGEN += 250
 
-            # output results
-            printSchedule(best_ind)
+    #     MODE = 'pop'
+    #     NGEN = 4000
+    #     POP_SIZE = 25
+    #     for i in range(39):
+    #         # main driver
+    #         pop, log, hof = main()
+    #         best_ind = hof.items[0]
 
-            POP_SIZE += 25
+    #         # output results
+    #         printSchedule(best_ind)
 
-        MODE = 'tourn'
-        POP_SIZE = 100
-        TOURNAMENT_SIZE = 1
-        for i in range(9):
-            # main driver
-            pop, log, hof = main()
-            best_ind = hof.items[0]
+    #         POP_SIZE += 25
 
-            # output results
-            printSchedule(best_ind)
+    #     MODE = 'tourn'
+    #     POP_SIZE = 100
+    #     TOURNAMENT_SIZE = 1
+    #     for i in range(9):
+    #         toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
-            TOURNAMENT_SIZE += 1
+    #         # main driver
+    #         pop, log, hof = main()
+    #         best_ind = hof.items[0]
+
+    #         # output results
+    #         printSchedule(best_ind)
+
+    #         TOURNAMENT_SIZE += 1
 
     pool.close()
 
