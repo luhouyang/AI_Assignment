@@ -1,3 +1,4 @@
+PRODUCT,PROCESS,MACHINE,TIME_SLOT
 Product 2,Assembly,2,1
 Product 1,Assembly,1,2
 Product 1,Assembly,2,4

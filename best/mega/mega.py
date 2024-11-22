@@ -539,7 +539,7 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(cpu_count)
     toolbox.register("map", pool.map)
 
-    POP_SIZE = 100
+    POP_SIZE = 150
     # crossover probability, mutation probability (population percentage), and number of generations
     CXPB, MUTPB, NGEN = 0.85, 0.5, 10000  # MUTPB is kept constant
     MU_INDPB = 0.01  # individual mutation probability
