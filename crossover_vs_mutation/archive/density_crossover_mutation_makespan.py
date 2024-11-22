@@ -35,7 +35,7 @@ plt.scatter(crossover_rate, mutation_rate, c=makespan, cmap='viridis_r', edgecol
 
 plt.xlabel('Crossover Rate', fontsize=12)
 plt.ylabel('Mutation Rate', fontsize=12)
-plt.title('Makespan Contour Map of Crossover vs Mutation', fontsize=14)
+plt.title('Makespan Gradient Density of Crossover vs Mutation', fontsize=14)
 plt.legend(loc='upper right')
 plt.tight_layout()
 

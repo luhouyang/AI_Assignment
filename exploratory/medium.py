@@ -6,67 +6,32 @@ from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io
 
 # uncomment cases to test the algorithm
 """
-largest example | HIGHSCORE: 46
+medium example | HIGHSCORE: 14
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
-PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
+PROCESSES = ['Assembly', 'Testing', 'Packaging']
 PROCESS_TIMES = {
-    'Cookie': {
+    'Product 1': {
         'Assembly': 2,
         'Testing': 1,
-        'Packaging': 1,
-        'Loading': 1
+        'Packaging': 1
     },
-    'EV car': {
-        'Assembly': 10,
-        'Testing': 2,
-        'Packaging': 1,
-        'Loading': 1
-    },
-    'Hose': {
-        'Assembly': 1,
-        'Testing': 2,
-        'Packaging': 2,
-        'Loading': 2
-    },
-    'Plumbus': {
-        'Assembly': 4,
-        'Testing': 5,
-        'Packaging': 2,
-        'Loading': 2
-    },
-    'Bomb': {
-        'Assembly': 1,
-        'Testing': 4,
-        'Packaging': 5,
-        'Loading': 2
-    },
-    'Cake': {
+    'Product 2': {
         'Assembly': 3,
-        'Testing': 1,
-        'Packaging': 2,
-        'Loading': 1
+        'Testing': 2,
+        'Packaging': 1
     },
-    'Bolts': {
+    'Product 3': {
         'Assembly': 1,
-        'Testing': 1,
-        'Packaging': 1,
-        'Loading': 1
+        'Testing': 2,
+        'Packaging': 2
     }
 }
-DEMAND = {
-    'Cookie': 15,
-    'EV car': 10,
-    'Hose': 14,
-    'Plumbus': 7,
-    'Bomb': 7,
-    'Cake': 7,
-    'Bolts': 20
-}
-MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
-WORK_HOURS = 12
-TIME_SLOT_DURATION = 5
+DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
+WORK_HOURS = 8
+TIME_SLOT_DURATION = 10  # minutes
 ###
 """
 variables
@@ -528,7 +493,10 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('largest_result.txt', 'w+') as f:
+    cx = str(CXPB).replace('.', '')
+    mx = str(MU_INDPB).replace('.', '')
+
+    with open(f'{TOURNAMENT_SIZE}_{POP_SIZE}_{cx}_{mx}_medium_result.txt', 'w+') as f:
         f.write(write_str)
         f.close()
 
@@ -536,13 +504,13 @@ def printSchedule(schedule):
     for item in schedule:
         log_str += f"{item[0]},{item[1]},{item[2]},{item[3]}\n"
 
-    with open('best_largest.txt', 'a+') as f:
+    
+    with open(f'{TOURNAMENT_SIZE}_{POP_SIZE}_{cx}_{mx}_medium.txt', 'a+') as f:
         f.write(log_str)
         f.close()
 
 
 def main():
-    # random.seed(42)
     random.seed(10)
     pop = toolbox.population(n=POP_SIZE)
     hof = tools.HallOfFame(1)
@@ -571,11 +539,22 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(cpu_count)
     toolbox.register("map", pool.map)
 
-    POP_SIZE = 100
+    MUTPB = 0.5  # MUTPB is kept constant
+
+    TOURNAMENT_SIZE = 3
+    # TOURNAMENT_SIZE = 4
+
+    POP_SIZE = 50
+    # POP_SIZE = 100
+
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.85, 0.5, 10000  # MUTPB is kept constant
+    CXPB = 0.7
+    # CXPB = 0.8
+
+    NGEN = 4000  # NGEN is kept constant
+
     MU_INDPB = 0.01  # individual mutation probability
-    TOURNAMENT_SIZE = 4
+    # MU_INDPB = 0.03
 
     toolbox.register("evaluate", evaluate)
     toolbox.register("mate", cxSelectiveTwoPoint)

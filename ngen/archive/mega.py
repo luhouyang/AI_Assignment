@@ -2,71 +2,40 @@
 import random
 import numpy as np
 import multiprocessing
+# from objproxies import CallbackProxy
 from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io/en/master/
 
 # uncomment cases to test the algorithm
 """
-largest example | HIGHSCORE: 46
+MEGA example | HIGHSCORE: 36
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
 PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
 PROCESS_TIMES = {
-    'Cookie': {
+    'Product 1': {
         'Assembly': 2,
         'Testing': 1,
         'Packaging': 1,
         'Loading': 1
     },
-    'EV car': {
-        'Assembly': 10,
-        'Testing': 2,
-        'Packaging': 1,
-        'Loading': 1
-    },
-    'Hose': {
-        'Assembly': 1,
-        'Testing': 2,
-        'Packaging': 2,
-        'Loading': 2
-    },
-    'Plumbus': {
-        'Assembly': 4,
-        'Testing': 5,
-        'Packaging': 2,
-        'Loading': 2
-    },
-    'Bomb': {
-        'Assembly': 1,
-        'Testing': 4,
-        'Packaging': 5,
-        'Loading': 2
-    },
-    'Cake': {
+    'Product 2': {
         'Assembly': 3,
-        'Testing': 1,
-        'Packaging': 2,
-        'Loading': 1
-    },
-    'Bolts': {
-        'Assembly': 1,
-        'Testing': 1,
+        'Testing': 2,
         'Packaging': 1,
         'Loading': 1
+    },
+    'Product 3': {
+        'Assembly': 1,
+        'Testing': 2,
+        'Packaging': 2,
+        'Loading': 2
     }
 }
-DEMAND = {
-    'Cookie': 15,
-    'EV car': 10,
-    'Hose': 14,
-    'Plumbus': 7,
-    'Bomb': 7,
-    'Cake': 7,
-    'Bolts': 20
-}
-MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
+DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
 WORK_HOURS = 12
-TIME_SLOT_DURATION = 5
+TIME_SLOT_DURATION = 10
 ###
 """
 variables
@@ -76,6 +45,11 @@ TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
 # genetic algorithmp parameters
 ERROR_PENALTY = 10000
+# POP_SIZE = 200
+# CXPB, MUTPB, NGEN = 0.95, 0.675, 5000  # crossover probability, mutation probability, and number of generations
+# TOURNAMENT_SIZE = 5
+# N_EVALS = 0
+# N_GENS = 0
 """
 find the earliest time that a process can be in
 example:
@@ -166,6 +140,11 @@ PSEUDOCODE
 
 
 def evaluate(individual):
+    # global N_EVALS, N_GENS
+    # N_EVALS += 1
+    # if N_EVALS % POP_SIZE == 0:
+    #     N_GENS += 1
+
     # used to hold penalty when process occur before previous process is done
     penalty = 0
 
@@ -317,7 +296,7 @@ PSEUDOCODE
 2. SELECT 2 random integers in between 1 and (SIZE - 1) and set to POINT_1 and POINT_2
 3. SWAP the intergers IF the POINT_1 is greter than POINT_2
 4. FROM POINT_1 to POINT_2:
-5.      SWAP BOTH machine AND time_slot
+5.      SWAP only TIME_SLOT values, only MACHINE number or BOTH values based on random probability
 6. RETURN both individuals
 """
 
@@ -334,12 +313,52 @@ def cxSelectiveTwoPoint(ind1, ind2):
 
     # swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
     for i in range(cxpoint1, cxpoint2):
+        swappb = random.randint(0, 1)
+
         # keep `product` and `process` constant
         product1, process1, machine1, time_slot1 = ind1[i]
         product2, process2, machine2, time_slot2 = ind2[i]
 
-        ind1[i] = (product1, process1, machine2, time_slot2)
-        ind2[i] = (product2, process2, machine1, time_slot1)
+        if swappb < 0.6:
+            # swap `time_slot` values only
+            ind1[i] = (product1, process1, machine1, time_slot2)
+            ind2[i] = (product2, process2, machine2, time_slot1)
+        elif swappb < 0.95:
+            # swap `machine` values only
+            ind1[i] = (product1, process1, machine2, time_slot1)
+            ind2[i] = (product2, process2, machine1, time_slot2)
+        else:
+            # swap `machine` and `time_slot` values only
+            ind1[i] = (product1, process1, machine2, time_slot2)
+            ind2[i] = (product2, process2, machine1, time_slot1)
+
+    return ind1, ind2
+
+
+def cxSelectiveOnePoint(ind1, ind2):
+    # choose crossover points
+    size = len(ind1)
+    cxpoint = random.randint(0, size - 1)
+
+    # swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
+    swappb = random.randint(0, 1)
+
+    # keep `product` and `process` constant
+    product1, process1, machine1, time_slot1 = ind1[cxpoint]
+    product2, process2, machine2, time_slot2 = ind2[cxpoint]
+
+    if swappb < 0.6:
+        # swap `time_slot` values only
+        ind1[cxpoint] = (product1, process1, machine1, time_slot2)
+        ind2[cxpoint] = (product2, process2, machine2, time_slot1)
+    elif swappb < 0.95:
+        # swap `machine` values only
+        ind1[cxpoint] = (product1, process1, machine2, time_slot1)
+        ind2[i] = (product2, process2, machine1, time_slot2)
+    else:
+        # swap `machine` and `time_slot` values only
+        ind1[cxpoint] = (product1, process1, machine2, time_slot2)
+        ind2[cxpoint] = (product2, process2, machine1, time_slot1)
 
     return ind1, ind2
 
@@ -348,9 +367,9 @@ def cxSelectiveTwoPoint(ind1, ind2):
 PSEUDOCODE
 1. FOR EACH process in the individual:
 2.      IF random probability < MUTATION_RATE:
-3.          MUTATE by randomly assigning MACHINE
+3.          EITHER MUTATE by randomly assigning MACHINE, INCREMENT or DECREMENT MACHINE index
 4.      IF random pobability < MUTATION_RATE:
-5.          MUTATE by randomly assigning TIME_SLOT
+5.          EITHER MUTATE by randomly assigning TIME_SLOT, INCREMENT or DECREMENT TIME_SLOT index
 6. RETURN individual
 """
 
@@ -362,12 +381,38 @@ def mutate(individual, indpb):
 
         # apply mutation based on the probability `indpb`
         if random.random() < indpb:
-            machine = random.randint(0, MACHINES[process] - 1)
+            """
+            20 % for randomly distributing machines, initially to converge at a valid configuration
+            40 % for both moving the machine up or down by 1, encourage vertical movement
+            """
+            # mutate the machine assignment
+            pb = random.random()
+            if pb < 0.2:
+                machine = random.randint(0, MACHINES[process] - 1)
+            elif pb < 0.6:
+                machine = (machine - 1) % MACHINES[process]
+            else:
+                machine = (machine + 1) % MACHINES[process]
 
         if random.random() < indpb:
-            time_slot = random.randint(
-                process_lag[product][process],
-                TIME_SLOTS - PROCESS_TIMES[product][process])
+            """
+            10 % for randomly distributing time slots, initially to converge at a valid configuration
+            45 % for both moving the time slot up or down by 1, encourage horizontal movement
+            """
+            # mutate the time slot assignment
+            pb = random.random()
+            if pb < 0.1:
+                time_slot = random.randint(
+                    process_lag[product][process],
+                    TIME_SLOTS - PROCESS_TIMES[product][process])
+            elif pb < 0.55:
+                time_slot = max(
+                    time_slot - 1,
+                    process_lag[product][process],
+                )
+            else:
+                time_slot = min(time_slot + 1,
+                                TIME_SLOTS - PROCESS_TIMES[product][process])
 
         # update the individual's schedule with the mutated values
         individual[i] = (product, process, machine, time_slot)
@@ -528,17 +573,59 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('largest_result.txt', 'w+') as f:
+    with open('result.txt', 'w+') as f:
         f.write(write_str)
         f.close()
 
-    log_str = ""
-    for item in schedule:
-        log_str += f"{item[0]},{item[1]},{item[2]},{item[3]}\n"
+    if (MODE == 'cx'):
+        with open('crossover_mega_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
 
-    with open('best_largest.txt', 'a+') as f:
-        f.write(log_str)
-        f.close()
+        with open('crossover_mega.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
+
+    elif (MODE == 'mu'):
+        with open('mutation_mega_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('mutation_mega.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
+
+    elif (MODE == 'ngen'):
+        with open('ngen_mega_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('ngen_mega.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
+
+    elif (MODE == 'pop'):
+        with open('pop_mega_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('pop_mega.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
+
+    elif (MODE == 'tourn'):
+        with open('tourn_mega_result.txt', 'a+') as f:
+            f.write('\n' + write_str + f'\n;\n')
+            f.close()
+
+        with open('tourn_mega.txt', 'a+') as f:
+            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
+            f.write(crs_data)
+            f.close()
 
 
 def main():
@@ -573,21 +660,42 @@ if __name__ == '__main__':
 
     POP_SIZE = 100
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.85, 0.5, 10000  # MUTPB is kept constant
-    MU_INDPB = 0.01  # individual mutation probability
-    TOURNAMENT_SIZE = 4
+    CXPB, MUTPB, NGEN = 0.7, 0.5, 4000  # MUTPB is kept constant
+    MU_INDPB = 0.03  # individual mutation probability
+    TOURNAMENT_SIZE = 5
 
     toolbox.register("evaluate", evaluate)
     toolbox.register("mate", cxSelectiveTwoPoint)
+    # toolbox.register("mate", cxSelectiveOnePoint)
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
-    # main driver
-    pop, log, hof = main()
-    best_ind = hof.items[0]
 
-    # output results
-    printSchedule(best_ind)
+    MODE = 'ngen'
+    MU_INDPB = 0.03
+    NGEN = 250
+    for i in range(39):
+        # main driver
+        pop, log, hof = main()
+        best_ind = hof.items[0]
+
+        # output results
+        printSchedule(best_ind)
+
+        NGEN += 250
+
+    MODE = 'ngen'
+    MU_INDPB = 0.03
+    NGEN = 25
+    for i in range(10):
+        # main driver
+        pop, log, hof = main()
+        best_ind = hof.items[0]
+
+        # output results
+        printSchedule(best_ind)
+
+        NGEN += 25
 
     pool.close()
 

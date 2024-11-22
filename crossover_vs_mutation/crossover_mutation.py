@@ -2,7 +2,6 @@
 import random
 import numpy as np
 import multiprocessing
-# from objproxies import CallbackProxy
 from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io/en/master/
 
 # uncomment cases to test the algorithm
@@ -29,7 +28,7 @@ small example | HIGHSCORE: 14
 # WORK_HOURS = 8
 # TIME_SLOT_DURATION = 15
 """
-medium example | HIGHSCORE: 16
+medium example | HIGHSCORE: 14
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -56,7 +55,7 @@ MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
 TIME_SLOT_DURATION = 10  # minutes
 """
-Mega example | HIGHSCORE: 36
+Mega example | HIGHSCORE: 15
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -86,7 +85,7 @@ to run this faster, run in your terminal
 # WORK_HOURS = 12
 # TIME_SLOT_DURATION = 10
 """
-Largest example | HIGHSCORE: 121
+Largest example | HIGHSCORE: 71
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -156,11 +155,6 @@ TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
 # genetic algorithmp parameters
 ERROR_PENALTY = 10000
-# POP_SIZE = 200
-# CXPB, MUTPB, NGEN = 0.95, 0.675, 5000  # crossover probability, mutation probability, and number of generations
-# TOURNAMENT_SIZE = 5
-# N_EVALS = 0
-# N_GENS = 0
 """
 find the earliest time that a process can be in
 example:
@@ -402,7 +396,7 @@ PSEUDOCODE
 2. SELECT 2 random integers in between 1 and (SIZE - 1) and set to POINT_1 and POINT_2
 3. SWAP the intergers IF the POINT_1 is greter than POINT_2
 4. FROM POINT_1 to POINT_2:
-5.      SWAP only TIME_SLOT values, only MACHINE number or BOTH values based on random probability
+5.      SWAP BOTH machine AND time_slot
 6. RETURN both individuals
 """
 
@@ -419,52 +413,12 @@ def cxSelectiveTwoPoint(ind1, ind2):
 
     # swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
     for i in range(cxpoint1, cxpoint2):
-        swappb = random.randint(0, 1)
-
         # keep `product` and `process` constant
         product1, process1, machine1, time_slot1 = ind1[i]
         product2, process2, machine2, time_slot2 = ind2[i]
 
-        if swappb < 0.6:
-            # swap `time_slot` values only
-            ind1[i] = (product1, process1, machine1, time_slot2)
-            ind2[i] = (product2, process2, machine2, time_slot1)
-        elif swappb < 0.95:
-            # swap `machine` values only
-            ind1[i] = (product1, process1, machine2, time_slot1)
-            ind2[i] = (product2, process2, machine1, time_slot2)
-        else:
-            # swap `machine` and `time_slot` values only
-            ind1[i] = (product1, process1, machine2, time_slot2)
-            ind2[i] = (product2, process2, machine1, time_slot1)
-
-    return ind1, ind2
-
-
-def cxSelectiveOnePoint(ind1, ind2):
-    # choose crossover points
-    size = len(ind1)
-    cxpoint = random.randint(0, size - 1)
-
-    # swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
-    swappb = random.randint(0, 1)
-
-    # keep `product` and `process` constant
-    product1, process1, machine1, time_slot1 = ind1[cxpoint]
-    product2, process2, machine2, time_slot2 = ind2[cxpoint]
-
-    if swappb < 0.6:
-        # swap `time_slot` values only
-        ind1[cxpoint] = (product1, process1, machine1, time_slot2)
-        ind2[cxpoint] = (product2, process2, machine2, time_slot1)
-    elif swappb < 0.95:
-        # swap `machine` values only
-        ind1[cxpoint] = (product1, process1, machine2, time_slot1)
-        ind2[i] = (product2, process2, machine1, time_slot2)
-    else:
-        # swap `machine` and `time_slot` values only
-        ind1[cxpoint] = (product1, process1, machine2, time_slot2)
-        ind2[cxpoint] = (product2, process2, machine1, time_slot1)
+        ind1[i] = (product1, process1, machine2, time_slot2)
+        ind2[i] = (product2, process2, machine1, time_slot1)
 
     return ind1, ind2
 
@@ -473,9 +427,9 @@ def cxSelectiveOnePoint(ind1, ind2):
 PSEUDOCODE
 1. FOR EACH process in the individual:
 2.      IF random probability < MUTATION_RATE:
-3.          EITHER MUTATE by randomly assigning MACHINE, INCREMENT or DECREMENT MACHINE index
+3.          MUTATE by randomly assigning MACHINE
 4.      IF random pobability < MUTATION_RATE:
-5.          EITHER MUTATE by randomly assigning TIME_SLOT, INCREMENT or DECREMENT TIME_SLOT index
+5.          MUTATE by randomly assigning TIME_SLOT
 6. RETURN individual
 """
 
@@ -487,43 +441,18 @@ def mutate(individual, indpb):
 
         # apply mutation based on the probability `indpb`
         if random.random() < indpb:
-            """
-            20 % for randomly distributing machines, initially to converge at a valid configuration
-            40 % for both moving the machine up or down by 1, encourage vertical movement
-            """
-            # mutate the machine assignment
-            pb = random.random()
-            if pb < 0.2:
-                machine = random.randint(0, MACHINES[process] - 1)
-            elif pb < 0.6:
-                machine = (machine - 1) % MACHINES[process]
-            else:
-                machine = (machine + 1) % MACHINES[process]
+            machine = random.randint(0, MACHINES[process] - 1)
 
         if random.random() < indpb:
-            """
-            10 % for randomly distributing time slots, initially to converge at a valid configuration
-            45 % for both moving the time slot up or down by 1, encourage horizontal movement
-            """
-            # mutate the time slot assignment
-            pb = random.random()
-            if pb < 0.1:
-                time_slot = random.randint(
-                    process_lag[product][process],
-                    TIME_SLOTS - PROCESS_TIMES[product][process])
-            elif pb < 0.55:
-                time_slot = max(
-                    time_slot - 1,
-                    process_lag[product][process],
-                )
-            else:
-                time_slot = min(time_slot + 1,
-                                TIME_SLOTS - PROCESS_TIMES[product][process])
+            time_slot = random.randint(
+                process_lag[product][process],
+                TIME_SLOTS - PROCESS_TIMES[product][process])
 
         # update the individual's schedule with the mutated values
         individual[i] = (product, process, machine, time_slot)
 
     return (individual, )
+
 
 from colorama import Fore  # for color text in terminal/notebook
 
@@ -678,10 +607,6 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    # with open('result.txt', 'w+') as f:
-    #     f.write(write_str)
-    #     f.close()
-
     # crossover vs mutation, density map
     if (MODE == 'cx_mu'):
         with open('crossover_mutation_result.txt', 'a+') as f:
@@ -695,7 +620,6 @@ def printSchedule(schedule):
 
 
 def main():
-    # random.seed(42)
     random.seed(10)
     pop = toolbox.population(n=POP_SIZE)
     hof = tools.HallOfFame(1)
@@ -726,9 +650,9 @@ if __name__ == '__main__':
 
     POP_SIZE = 100
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.7, 0.5, 4000  # MUTPB is kept constant
-    MU_INDPB = 0.03  # individual mutation probability
-    TOURNAMENT_SIZE = 5
+    CXPB, MUTPB, NGEN = 0.85, 0.5, 4000  # MUTPB is kept constant
+    MU_INDPB = 0.01  # individual mutation probability
+    TOURNAMENT_SIZE = 4
 
     toolbox.register("evaluate", evaluate)
     toolbox.register("mate", cxSelectiveTwoPoint)
@@ -743,7 +667,7 @@ if __name__ == '__main__':
         MU_INDPB = 0.01
         for i in range(13):
             toolbox.register("mutate", mutate, indpb=MU_INDPB)
-            
+
             # main driver
             pop, log, hof = main()
             best_ind = hof.items[0]
