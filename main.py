@@ -7,24 +7,7 @@ from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io
 
 # uncomment cases to test the algorithm
 """
-mini example | HIGHSCORE: 13
-to run this faster, run in your terminal
-`python product_scheduling.py`
-"""
-# PROCESSES = ['Assembly', 'Testing', 'Packaging']
-# PROCESS_TIMES = {
-#     'Product 1': {
-#         'Assembly': 2,
-#         'Testing': 1,
-#         'Packaging': 1
-#     },
-# }
-# DEMAND = {'Product 1': 5}
-# MACHINES = {'Assembly': 1, 'Testing': 1, 'Packaging': 1}
-# WORK_HOURS = 8
-# TIME_SLOT_DURATION = 30
-"""
-simple example | HIGHSCORE: 14
+small example | HIGHSCORE: 14
 # to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -241,11 +224,9 @@ def create_individual():
                 lowest_index = process_lag[product][process]
                 highest_index = TIME_SLOTS - PROCESS_TIMES[product][process]
 
-                rng = int(highest_index * (PROCESSES.index(process) + eps) /
-                          (len(PROCESSES)))
+                extend_range = int(highest_index * (PROCESSES.index(process) + eps) / (len(PROCESSES)))
 
-                time_slot = random.randint(
-                    lowest_index, min(lowest_index + rng, highest_index))
+                time_slot = random.randint(lowest_index, min(lowest_index + extend_range, highest_index))
 
                 schedule.append((product, process, machine, time_slot))
     return schedule
@@ -818,8 +799,8 @@ if __name__ == '__main__':
 
     POP_SIZE = 100
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.7, 0.5, 4000  # MUTPB is kept constant
-    MU_INDPB = 0.03  # individual mutation probability
+    CXPB, MUTPB, NGEN = 0.85, 0.5, 4000  # MUTPB is kept constant
+    MU_INDPB = 0.01  # individual mutation probability
     TOURNAMENT_SIZE = 5
     MODE = ""
 

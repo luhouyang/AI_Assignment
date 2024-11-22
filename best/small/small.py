@@ -7,8 +7,8 @@ from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io
 
 # uncomment cases to test the algorithm
 """
-medium example | HIGHSCORE: 15
-to run this faster, run in your terminal
+small example | HIGHSCORE: 14
+# to run this faster, run in your terminal
 `python product_scheduling.py`
 """
 PROCESSES = ['Assembly', 'Testing', 'Packaging']
@@ -17,22 +17,17 @@ PROCESS_TIMES = {
         'Assembly': 2,
         'Testing': 1,
         'Packaging': 1
-    },
+    },  # time slots required
     'Product 2': {
         'Assembly': 3,
         'Testing': 2,
         'Packaging': 1
-    },
-    'Product 3': {
-        'Assembly': 1,
-        'Testing': 2,
-        'Packaging': 2
     }
 }
-DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
-MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
+DEMAND = {'Product 1': 5, 'Product 2': 4}
+MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
 WORK_HOURS = 8
-TIME_SLOT_DURATION = 10  # minutes
+TIME_SLOT_DURATION = 15
 ###
 """
 variables
@@ -570,7 +565,7 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('medium_result.txt', 'w+') as f:
+    with open('small_result.txt', 'w+') as f:
         f.write(write_str)
         f.close()
 
@@ -578,7 +573,7 @@ def printSchedule(schedule):
     for item in schedule:
         log_str += f"{item[0]},{item[1]},{item[2]},{item[3]}\n"
 
-    with open('best_medium.txt', 'a+') as f:
+    with open('best_small.txt', 'a+') as f:
         f.write(log_str)
         f.close()
 
@@ -615,7 +610,7 @@ if __name__ == '__main__':
 
     POP_SIZE = 100
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.85, 0.5, 4000  # MUTPB is kept constant
+    CXPB, MUTPB, NGEN = 0.7, 0.5, 10000  # MUTPB is kept constant
     MU_INDPB = 0.01  # individual mutation probability
     TOURNAMENT_SIZE = 5
 

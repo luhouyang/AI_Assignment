@@ -7,7 +7,7 @@ from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io
 
 # uncomment cases to test the algorithm
 """
-biggest example | HIGHSCORE: 121
+largest example | HIGHSCORE: 121
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -610,51 +610,51 @@ def printSchedule(schedule):
         f.close()
 
     if (MODE == 'cx'):
-        with open('crossover_biggest_result.txt', 'a+') as f:
+        with open('crossover_largest_result.txt', 'a+') as f:
             f.write('\n' + write_str + f'\n;\n')
             f.close()
 
-        with open('crossover_biggest.txt', 'a+') as f:
+        with open('crossover_largest.txt', 'a+') as f:
             crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
     elif (MODE == 'mu'):
-        with open('mutation_biggest_result.txt', 'a+') as f:
+        with open('mutation_largest_result.txt', 'a+') as f:
             f.write('\n' + write_str + f'\n;\n')
             f.close()
 
-        with open('mutation_biggest.txt', 'a+') as f:
+        with open('mutation_largest.txt', 'a+') as f:
             crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
     elif (MODE == 'ngen'):
-        with open('ngen_biggest_result.txt', 'a+') as f:
+        with open('ngen_largest_result.txt', 'a+') as f:
             f.write('\n' + write_str + f'\n;\n')
             f.close()
 
-        with open('ngen_biggest.txt', 'a+') as f:
+        with open('ngen_largest.txt', 'a+') as f:
             crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
     elif (MODE == 'pop'):
-        with open('pop_biggest_result.txt', 'a+') as f:
+        with open('pop_largest_result.txt', 'a+') as f:
             f.write('\n' + write_str + f'\n;\n')
             f.close()
 
-        with open('pop_biggest.txt', 'a+') as f:
+        with open('pop_largest.txt', 'a+') as f:
             crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()
 
     elif (MODE == 'tourn'):
-        with open('tourn_biggest_result.txt', 'a+') as f:
+        with open('tourn_largest_result.txt', 'a+') as f:
             f.write('\n' + write_str + f'\n;\n')
             f.close()
 
-        with open('tourn_biggest.txt', 'a+') as f:
+        with open('tourn_largest.txt', 'a+') as f:
             crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
             f.write(crs_data)
             f.close()

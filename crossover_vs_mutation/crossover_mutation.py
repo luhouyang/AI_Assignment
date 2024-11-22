@@ -7,24 +7,7 @@ from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io
 
 # uncomment cases to test the algorithm
 """
-mini example | HIGHSCORE: 13
-to run this faster, run in your terminal
-`python product_scheduling.py`
-"""
-# PROCESSES = ['Assembly', 'Testing', 'Packaging']
-# PROCESS_TIMES = {
-#     'Product 1': {
-#         'Assembly': 2,
-#         'Testing': 1,
-#         'Packaging': 1
-#     },
-# }
-# DEMAND = {'Product 1': 5}
-# MACHINES = {'Assembly': 1, 'Testing': 1, 'Packaging': 1}
-# WORK_HOURS = 8
-# TIME_SLOT_DURATION = 30
-"""
-simple example | HIGHSCORE: 14
+small example | HIGHSCORE: 14
 # to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -73,7 +56,7 @@ MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
 TIME_SLOT_DURATION = 10  # minutes
 """
-MEGA example | HIGHSCORE: 36
+Mega example | HIGHSCORE: 36
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -103,7 +86,7 @@ to run this faster, run in your terminal
 # WORK_HOURS = 12
 # TIME_SLOT_DURATION = 10
 """
-HEHEHAHA example | HIGHSCORE: 121
+Largest example | HIGHSCORE: 121
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """

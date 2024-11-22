@@ -7,8 +7,8 @@ from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io
 
 # uncomment cases to test the algorithm
 """
-small example | HIGHSCORE: 14
-# to run this faster, run in your terminal
+medium example | HIGHSCORE: 15
+to run this faster, run in your terminal
 `python product_scheduling.py`
 """
 PROCESSES = ['Assembly', 'Testing', 'Packaging']
@@ -17,17 +17,22 @@ PROCESS_TIMES = {
         'Assembly': 2,
         'Testing': 1,
         'Packaging': 1
-    },  # time slots required
+    },
     'Product 2': {
         'Assembly': 3,
         'Testing': 2,
         'Packaging': 1
+    },
+    'Product 3': {
+        'Assembly': 1,
+        'Testing': 2,
+        'Packaging': 2
     }
 }
-DEMAND = {'Product 1': 5, 'Product 2': 4}
-MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
+DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
-TIME_SLOT_DURATION = 15
+TIME_SLOT_DURATION = 10  # minutes
 ###
 """
 variables
@@ -565,59 +570,17 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('result.txt', 'w+') as f:
+    with open('medium_result.txt', 'w+') as f:
         f.write(write_str)
         f.close()
 
-    if (MODE == 'cx'):
-        with open('crossover_small_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
+    log_str = ""
+    for item in schedule:
+        log_str += f"{item[0]},{item[1]},{item[2]},{item[3]}\n"
 
-        with open('crossover_small.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
-    elif (MODE == 'mu'):
-        with open('mutation_small_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('mutation_small.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
-    elif (MODE == 'ngen'):
-        with open('ngen_small_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('ngen_small.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
-    elif (MODE == 'pop'):
-        with open('pop_small_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('pop_small.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
-    elif (MODE == 'tourn'):
-        with open('tourn_small_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('tourn_small.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
+    with open('best_medium.txt', 'a+') as f:
+        f.write(log_str)
+        f.close()
 
 
 def main():
@@ -652,8 +615,8 @@ if __name__ == '__main__':
 
     POP_SIZE = 100
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.7, 0.5, 4000  # MUTPB is kept constant
-    MU_INDPB = 0.03  # individual mutation probability
+    CXPB, MUTPB, NGEN = 0.85, 0.5, 10000  # MUTPB is kept constant
+    MU_INDPB = 0.01  # individual mutation probability
     TOURNAMENT_SIZE = 5
 
     toolbox.register("evaluate", evaluate)
@@ -663,31 +626,12 @@ if __name__ == '__main__':
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
 
-    MODE = 'ngen'
-    MU_INDPB = 0.03
-    NGEN = 250
-    for i in range(39):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
+    # main driver
+    pop, log, hof = main()
+    best_ind = hof.items[0]
 
-        # output results
-        printSchedule(best_ind)
-
-        NGEN += 250
-
-    MODE = 'ngen'
-    MU_INDPB = 0.03
-    NGEN = 25
-    for i in range(10):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
-
-        # output results
-        printSchedule(best_ind)
-
-        NGEN += 25
+    # output results
+    printSchedule(best_ind)
 
     pool.close()
 
