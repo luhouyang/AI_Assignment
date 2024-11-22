@@ -528,7 +528,11 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('largest_result.txt', 'w+') as f:
+    cx = str(CXPB).replace('.', '')
+    mx = str(MU_INDPB).replace('.', '')
+
+    with open(f'{TOURNAMENT_SIZE}_{POP_SIZE}_{cx}_{mx}_largest_result.txt',
+              'w+') as f:
         f.write(write_str)
         f.close()
 
@@ -536,7 +540,7 @@ def printSchedule(schedule):
     for item in schedule:
         log_str += f"{item[0]},{item[1]},{item[2]},{item[3]}\n"
 
-    with open('best_largest.txt', 'a+') as f:
+    with open(f'{TOURNAMENT_SIZE}_{POP_SIZE}_{cx}_{mx}_largest.txt', 'a+') as f:
         f.write(log_str)
         f.close()
 
@@ -582,11 +586,44 @@ if __name__ == '__main__':
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
-    # main driver
+    TOURNAMENT_SIZE = 3
+    POP_SIZE = 100
+    CXPB = 0.7
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
     pop, log, hof = main()
     best_ind = hof.items[0]
+    printSchedule(best_ind)
 
-    # output results
+    TOURNAMENT_SIZE = 4
+    POP_SIZE = 50
+    CXPB = 0.9
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    TOURNAMENT_SIZE = 4
+    POP_SIZE = 100
+    CXPB = 0.8
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    TOURNAMENT_SIZE = 4
+    POP_SIZE = 100
+    CXPB = 0.9
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
     printSchedule(best_ind)
 
     pool.close()

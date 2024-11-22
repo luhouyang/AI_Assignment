@@ -496,7 +496,8 @@ def printSchedule(schedule):
     cx = str(CXPB).replace('.', '')
     mx = str(MU_INDPB).replace('.', '')
 
-    with open(f'{TOURNAMENT_SIZE}_{POP_SIZE}_{cx}_{mx}_medium_result.txt', 'w+') as f:
+    with open(f'{TOURNAMENT_SIZE}_{POP_SIZE}_{cx}_{mx}_medium_result.txt',
+              'w+') as f:
         f.write(write_str)
         f.close()
 
@@ -504,7 +505,6 @@ def printSchedule(schedule):
     for item in schedule:
         log_str += f"{item[0]},{item[1]},{item[2]},{item[3]}\n"
 
-    
     with open(f'{TOURNAMENT_SIZE}_{POP_SIZE}_{cx}_{mx}_medium.txt', 'a+') as f:
         f.write(log_str)
         f.close()
@@ -550,6 +550,7 @@ if __name__ == '__main__':
     # crossover probability, mutation probability (population percentage), and number of generations
     CXPB = 0.7
     # CXPB = 0.8
+    # CXPB = 0.9
 
     NGEN = 4000  # NGEN is kept constant
 
@@ -561,11 +562,164 @@ if __name__ == '__main__':
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
-    # main driver
     pop, log, hof = main()
     best_ind = hof.items[0]
+    printSchedule(best_ind)
 
-    # output results
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.8
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.9
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    POP_SIZE = 100
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.7
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.8
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.9
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    ###
+
+    TOURNAMENT_SIZE = 4
+    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+    POP_SIZE = 50
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.7
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.8
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.9
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    POP_SIZE = 100
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.7
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.8
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.9
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
     printSchedule(best_ind)
 
     pool.close()
