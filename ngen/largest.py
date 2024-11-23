@@ -648,6 +648,18 @@ if __name__ == '__main__':
 
         NGEN += 250
 
+    MODE = 'ngen'
+    NGEN = 25
+    for i in range(9):
+        # main driver
+        pop, log, hof = main()
+        best_ind = hof.items[0]
+
+        # output results
+        printSchedule(best_ind)
+
+        NGEN += 25
+
     pool.close()
 
 # %%
