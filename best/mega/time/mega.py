@@ -32,7 +32,7 @@ PROCESS_TIMES = {
         'Loading': 2
     }
 }
-DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+DEMAND = {'Product 1': 12, 'Product 2': 13, 'Product 3': 12}
 MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
 WORK_HOURS = 12
 TIME_SLOT_DURATION = 10
@@ -501,7 +501,7 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('mega_result.txt', 'w+') as f:
+    with open('mega_result.txt', 'a+') as f:
         f.write(write_str)
         f.close()
 
@@ -544,9 +544,9 @@ if __name__ == '__main__':
     pool = multiprocessing.Pool(cpu_count)
     toolbox.register("map", pool.map)
 
-    POP_SIZE = 150
+    POP_SIZE = 100
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.85, 0.5, 10000  # MUTPB is kept constant
+    CXPB, MUTPB, NGEN = 0.85, 0.5, 4000  # MUTPB is kept constant
     MU_INDPB = 0.01  # individual mutation probability
     TOURNAMENT_SIZE = 4
 
@@ -560,7 +560,7 @@ if __name__ == '__main__':
     pop, log, hof = main()
     end = time.time()
 
-    with open('mega_time.txt', 'w+') as f:
+    with open('mega_time.txt', 'a+') as f:
         f.write(
             f"{end - begin},{total_processes},{total_products},{total_machines},{possible_time_slots}\n"
         )

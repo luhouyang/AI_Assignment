@@ -29,7 +29,7 @@ PROCESS_TIMES = {
         'Packaging': 2
     }
 }
-DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
+DEMAND = {'Product 1': 8, 'Product 2': 9, 'Product 3': 9}
 MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
 TIME_SLOT_DURATION = 10  # minutes
@@ -498,7 +498,7 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('medium_result.txt', 'w+') as f:
+    with open('medium_result.txt', 'a+') as f:
         f.write(write_str)
         f.close()
 
@@ -533,8 +533,9 @@ if __name__ == '__main__':
     toolbox.register("map", pool.map)
 
     POP_SIZE = 100
+    # POP_SIZE = 150
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.85, 0.5, 10000  # MUTPB is kept constant
+    CXPB, MUTPB, NGEN = 0.85, 0.5, 4000  # MUTPB is kept constant
     MU_INDPB = 0.01  # individual mutation probability
     TOURNAMENT_SIZE = 4
 
@@ -548,7 +549,7 @@ if __name__ == '__main__':
     pop, log, hof = main()
     end = time.time()
 
-    with open('medium_time.txt', 'w+') as f:
+    with open('medium_time.txt', 'a+') as f:
         f.write(
             f"{end - begin},{total_processes},{total_products},{total_machines},{possible_time_slots}\n"
         )
