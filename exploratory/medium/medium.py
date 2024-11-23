@@ -562,32 +562,19 @@ if __name__ == '__main__':
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
-    pop, log, hof = main()
-    best_ind = hof.items[0]
-    printSchedule(best_ind)
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
 
-    MU_INDPB = 0.03
-    toolbox.register("mutate", mutate, indpb=MU_INDPB)
-    pop, log, hof = main()
-    best_ind = hof.items[0]
-    printSchedule(best_ind)
-
-    MU_INDPB = 0.01
-    toolbox.register("mutate", mutate, indpb=MU_INDPB)
-    CXPB = 0.8
-    pop, log, hof = main()
-    best_ind = hof.items[0]
-    printSchedule(best_ind)
-
-    MU_INDPB = 0.03
-    toolbox.register("mutate", mutate, indpb=MU_INDPB)
-    pop, log, hof = main()
-    best_ind = hof.items[0]
-    printSchedule(best_ind)
+    # MU_INDPB = 0.03
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
 
     MU_INDPB = 0.01
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
-    CXPB = 0.9
+    CXPB = 0.75
     pop, log, hof = main()
     best_ind = hof.items[0]
     printSchedule(best_ind)
@@ -597,11 +584,63 @@ if __name__ == '__main__':
     pop, log, hof = main()
     best_ind = hof.items[0]
     printSchedule(best_ind)
+
+    # MU_INDPB = 0.01
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # CXPB = 0.8
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
+
+    # MU_INDPB = 0.03
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.85
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    # MU_INDPB = 0.01
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # CXPB = 0.9
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
+
+    # MU_INDPB = 0.03
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
 
     POP_SIZE = 100
+    # MU_INDPB = 0.01
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # CXPB = 0.7
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
+
+    # MU_INDPB = 0.03
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
+
     MU_INDPB = 0.01
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
-    CXPB = 0.7
+    CXPB = 0.75
     pop, log, hof = main()
     best_ind = hof.items[0]
     printSchedule(best_ind)
@@ -612,9 +651,22 @@ if __name__ == '__main__':
     best_ind = hof.items[0]
     printSchedule(best_ind)
 
+    # MU_INDPB = 0.01
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # CXPB = 0.8
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
+
+    # MU_INDPB = 0.03
+    # toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    # pop, log, hof = main()
+    # best_ind = hof.items[0]
+    # printSchedule(best_ind)
+
     MU_INDPB = 0.01
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
-    CXPB = 0.8
+    CXPB = 0.85
     pop, log, hof = main()
     best_ind = hof.items[0]
     printSchedule(best_ind)
@@ -658,7 +710,33 @@ if __name__ == '__main__':
 
     MU_INDPB = 0.01
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.75
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
     CXPB = 0.8
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.85
     pop, log, hof = main()
     best_ind = hof.items[0]
     printSchedule(best_ind)
@@ -698,7 +776,33 @@ if __name__ == '__main__':
 
     MU_INDPB = 0.01
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.75
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
     CXPB = 0.8
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.03
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    CXPB = 0.85
     pop, log, hof = main()
     best_ind = hof.items[0]
     printSchedule(best_ind)

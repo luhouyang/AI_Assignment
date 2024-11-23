@@ -1,0 +1,320 @@
+Cookie,Assembly,22,1
+Cookie,Assembly,13,1
+Hose,Assembly,15,1
+Hose,Assembly,4,1
+Plumbus,Assembly,16,1
+Bomb,Assembly,8,1
+Cake,Assembly,12,1
+Cake,Assembly,6,1
+Bolts,Assembly,21,1
+Bolts,Assembly,11,1
+Bolts,Assembly,19,1
+Bolts,Assembly,20,1
+Bolts,Assembly,9,1
+Bolts,Assembly,7,1
+Bolts,Assembly,18,1
+Bolts,Assembly,14,1
+Cookie,Assembly,10,2
+Cookie,Assembly,1,2
+EV car,Assembly,3,2
+Hose,Assembly,5,2
+Hose,Assembly,21,2
+Hose,Assembly,18,2
+Hose,Assembly,7,2
+Hose,Assembly,15,2
+Hose,Assembly,14,2
+Hose,Testing,12,2
+Hose,Testing,14,2
+Plumbus,Assembly,4,2
+Bomb,Assembly,11,2
+Bolts,Assembly,19,2
+Bolts,Assembly,17,2
+Bolts,Assembly,20,2
+Bolts,Testing,10,2
+Bolts,Testing,2,2
+Bolts,Testing,5,2
+Bolts,Testing,6,2
+Bolts,Testing,1,2
+Cookie,Assembly,11,3
+Cookie,Assembly,19,3
+Cookie,Assembly,21,3
+Cookie,Testing,13,3
+EV car,Assembly,8,3
+Hose,Assembly,17,3
+Hose,Testing,2,3
+Hose,Testing,3,3
+Hose,Testing,7,3
+Bomb,Assembly,18,3
+Bolts,Assembly,2,3
+Bolts,Assembly,9,3
+Bolts,Testing,6,3
+Bolts,Testing,9,3
+Bolts,Testing,10,3
+Bolts,Testing,15,3
+Bolts,Packaging,11,3
+Bolts,Packaging,13,3
+Bolts,Packaging,12,3
+Cookie,Assembly,6,4
+Cookie,Assembly,22,4
+Cookie,Testing,14,4
+Cookie,Testing,5,4
+Cookie,Packaging,4,4
+EV car,Assembly,5,4
+EV car,Assembly,9,4
+Hose,Assembly,10,4
+Hose,Assembly,18,4
+Hose,Testing,8,4
+Hose,Testing,11,4
+Hose,Packaging,10,4
+Plumbus,Assembly,20,4
+Bomb,Testing,10,4
+Bolts,Assembly,17,4
+Bolts,Assembly,14,4
+Bolts,Testing,1,4
+Bolts,Testing,13,4
+Bolts,Packaging,7,4
+Bolts,Packaging,13,4
+Bolts,Packaging,11,4
+Bolts,Loading,12,4
+Cookie,Assembly,15,5
+Cookie,Assembly,12,5
+Cookie,Testing,14,5
+Cookie,Packaging,2,5
+Cookie,Packaging,13,5
+Cookie,Loading,3,5
+EV car,Assembly,2,5
+Hose,Assembly,21,5
+Hose,Assembly,13,5
+Hose,Testing,2,5
+Bomb,Assembly,7,5
+Bolts,Testing,6,5
+Bolts,Testing,3,5
+Bolts,Packaging,4,5
+Bolts,Packaging,6,5
+Bolts,Packaging,8,5
+Bolts,Packaging,12,5
+Bolts,Loading,12,5
+Bolts,Loading,7,5
+Bolts,Loading,8,5
+Cookie,Testing,12,6
+Cookie,Testing,4,6
+Cookie,Packaging,5,6
+Cookie,Loading,11,6
+Cookie,Loading,2,6
+Hose,Assembly,1,6
+Hose,Testing,8,6
+Hose,Testing,13,6
+Hose,Packaging,2,6
+Plumbus,Assembly,6,6
+Bomb,Assembly,17,6
+Cake,Assembly,13,6
+Bolts,Assembly,21,6
+Bolts,Assembly,16,6
+Bolts,Testing,5,6
+Bolts,Testing,9,6
+Bolts,Packaging,8,6
+Bolts,Packaging,6,6
+Bolts,Loading,5,6
+Bolts,Loading,9,6
+Bolts,Loading,8,6
+Cookie,Assembly,21,7
+Cookie,Testing,15,7
+Cookie,Packaging,1,7
+Cookie,Packaging,12,7
+Cookie,Loading,8,7
+EV car,Assembly,17,7
+Hose,Packaging,13,7
+Plumbus,Assembly,1,7
+Plumbus,Testing,3,7
+Bomb,Assembly,12,7
+Cake,Testing,7,7
+Bolts,Testing,5,7
+Bolts,Packaging,7,7
+Bolts,Loading,6,7
+Cookie,Assembly,15,8
+Cookie,Testing,1,8
+Cookie,Testing,15,8
+Cookie,Loading,8,8
+EV car,Assembly,14,8
+Hose,Testing,6,8
+Hose,Packaging,11,8
+Hose,Packaging,2,8
+Hose,Packaging,3,8
+Bomb,Assembly,19,8
+Bomb,Testing,12,8
+Bomb,Testing,14,8
+Cake,Testing,9,8
+Cake,Packaging,8,8
+Bolts,Assembly,7,8
+Bolts,Loading,4,8
+Bolts,Loading,12,8
+Bolts,Loading,5,8
+Cookie,Testing,10,9
+Cookie,Testing,15,9
+Cookie,Loading,9,9
+Hose,Testing,2,9
+Hose,Packaging,6,9
+Hose,Packaging,13,9
+Hose,Packaging,1,9
+Hose,Loading,11,9
+Plumbus,Assembly,7,9
+Bomb,Testing,13,9
+Bolts,Assembly,13,9
+Bolts,Testing,11,9
+Bolts,Packaging,12,9
+Bolts,Packaging,4,9
+Cookie,Packaging,3,10
+Cookie,Packaging,11,10
+Hose,Loading,9,10
+Hose,Loading,12,10
+Cake,Assembly,6,10
+Cake,Assembly,10,10
+Cake,Testing,7,10
+Cake,Packaging,12,10
+Bolts,Testing,11,10
+Bolts,Packaging,10,10
+Cookie,Assembly,1,11
+Cookie,Packaging,8,11
+Cookie,Packaging,10,11
+Cookie,Loading,6,11
+Cookie,Loading,3,11
+EV car,Assembly,22,11
+Hose,Packaging,4,11
+Hose,Loading,5,11
+Plumbus,Testing,1,11
+Bolts,Packaging,6,11
+Bolts,Loading,2,11
+Bolts,Loading,7,11
+Cookie,Testing,9,12
+Cookie,Packaging,6,12
+Cookie,Loading,3,12
+Cookie,Loading,8,12
+Hose,Testing,14,12
+Hose,Testing,3,12
+Hose,Packaging,5,12
+Hose,Loading,7,12
+Hose,Loading,9,12
+Plumbus,Testing,11,12
+Plumbus,Packaging,8,12
+Cake,Assembly,20,12
+Cake,Loading,4,12
+Cookie,Assembly,12,13
+Cookie,Loading,12,13
+EV car,Assembly,21,13
+EV car,Testing,13,13
+Hose,Packaging,11,13
+Plumbus,Testing,10,13
+Bomb,Testing,6,13
+Cake,Packaging,10,13
+Bolts,Testing,2,13
+Bolts,Packaging,3,13
+Bolts,Loading,8,13
+Bolts,Loading,10,13
+Hose,Packaging,5,14
+Hose,Loading,13,14
+Hose,Loading,5,14
+Plumbus,Assembly,1,14
+Cake,Testing,4,14
+Cookie,Packaging,1,15
+EV car,Testing,2,15
+EV car,Testing,8,15
+Hose,Loading,3,15
+Hose,Loading,2,15
+Bomb,Packaging,7,15
+Cake,Testing,5,15
+Cake,Testing,13,15
+Bolts,Assembly,10,15
+Bolts,Loading,1,15
+EV car,Testing,9,16
+EV car,Packaging,3,16
+Hose,Loading,6,16
+Cake,Packaging,1,16
+Cake,Packaging,11,16
+Cookie,Testing,2,17
+EV car,Testing,5,17
+EV car,Testing,6,17
+EV car,Packaging,6,17
+EV car,Loading,8,17
+Plumbus,Packaging,10,17
+Cake,Assembly,6,17
+Cake,Loading,5,17
+Bolts,Packaging,5,17
+Bolts,Loading,2,17
+EV car,Testing,12,18
+EV car,Packaging,9,18
+EV car,Packaging,12,18
+EV car,Loading,8,18
+Plumbus,Testing,11,18
+Plumbus,Loading,1,18
+Bomb,Testing,8,18
+Bomb,Packaging,5,18
+Bolts,Loading,12,18
+Cookie,Testing,5,19
+Cookie,Loading,2,19
+EV car,Packaging,2,19
+EV car,Packaging,1,19
+EV car,Loading,6,19
+Plumbus,Testing,1,19
+Plumbus,Packaging,12,19
+Plumbus,Packaging,4,19
+Cake,Loading,11,19
+EV car,Assembly,9,20
+Hose,Loading,12,20
+Plumbus,Loading,6,20
+Cake,Loading,9,20
+Plumbus,Loading,2,21
+Plumbus,Loading,5,21
+Bomb,Packaging,13,21
+Bomb,Packaging,7,21
+Bomb,Loading,11,21
+Cake,Testing,13,21
+Bolts,Testing,4,21
+Cookie,Testing,7,22
+EV car,Packaging,8,22
+EV car,Loading,7,22
+Bolts,Loading,9,22
+EV car,Testing,3,23
+EV car,Loading,8,23
+Bomb,Testing,9,23
+Cookie,Packaging,5,24
+EV car,Loading,11,24
+Hose,Packaging,9,24
+Bomb,Loading,3,24
+Bolts,Packaging,8,24
+Cookie,Loading,4,25
+Hose,Loading,5,25
+Cookie,Packaging,5,26
+EV car,Packaging,2,26
+Plumbus,Packaging,7,26
+Cookie,Packaging,12,27
+Cookie,Loading,10,27
+EV car,Loading,12,27
+Bomb,Packaging,11,27
+Bomb,Loading,13,27
+Plumbus,Loading,10,28
+Cookie,Loading,2,29
+EV car,Testing,2,29
+Bomb,Packaging,1,29
+Cake,Packaging,8,29
+Bolts,Loading,1,29
+Plumbus,Testing,12,30
+Plumbus,Packaging,6,30
+Bomb,Loading,10,30
+EV car,Testing,13,31
+EV car,Loading,1,31
+EV car,Packaging,4,32
+Hose,Loading,2,32
+EV car,Loading,3,33
+Bomb,Loading,9,33
+Plumbus,Loading,5,34
+Bomb,Loading,6,34
+Cake,Loading,9,35
+EV car,Packaging,5,36
+Plumbus,Packaging,11,36
+Bomb,Packaging,12,37
+Cake,Loading,3,38
+EV car,Loading,12,39
+Cake,Packaging,8,42
+Bomb,Loading,2,44
+Cake,Loading,1,46
+Plumbus,Loading,9,52

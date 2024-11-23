@@ -1,35 +1,13 @@
 # %%
+import time
 import random
 import numpy as np
 import multiprocessing
-# from objproxies import CallbackProxy
 from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io/en/master/
 
 # uncomment cases to test the algorithm
 """
-small example | HIGHSCORE: 14
-# to run this faster, run in your terminal
-`python product_scheduling.py`
-"""
-# PROCESSES = ['Assembly', 'Testing', 'Packaging']
-# PROCESS_TIMES = {
-#     'Product 1': {
-#         'Assembly': 2,
-#         'Testing': 1,
-#         'Packaging': 1
-#     },  # time slots required
-#     'Product 2': {
-#         'Assembly': 3,
-#         'Testing': 2,
-#         'Packaging': 1
-#     }
-# }
-# DEMAND = {'Product 1': 5, 'Product 2': 4}
-# MACHINES = {'Assembly': 2, 'Testing': 2, 'Packaging': 2}
-# WORK_HOURS = 8
-# TIME_SLOT_DURATION = 15
-"""
-medium example | HIGHSCORE: 15
+medium example | HIGHSCORE: 14
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -55,98 +33,6 @@ DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
 MACHINES = {'Assembly': 7, 'Testing': 5, 'Packaging': 5}
 WORK_HOURS = 8
 TIME_SLOT_DURATION = 10  # minutes
-"""
-Mega example | HIGHSCORE: 15
-to run this faster, run in your terminal
-`python product_scheduling.py`
-"""
-# PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
-# PROCESS_TIMES = {
-#     'Product 1': {
-#         'Assembly': 2,
-#         'Testing': 1,
-#         'Packaging': 1,
-#         'Loading': 1
-#     },
-#     'Product 2': {
-#         'Assembly': 3,
-#         'Testing': 2,
-#         'Packaging': 1,
-#         'Loading': 1
-#     },
-#     'Product 3': {
-#         'Assembly': 1,
-#         'Testing': 2,
-#         'Packaging': 2,
-#         'Loading': 2
-#     }
-# }
-# DEMAND = {'Product 1': 10, 'Product 2': 10, 'Product 3': 10}
-# MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
-# WORK_HOURS = 12
-# TIME_SLOT_DURATION = 10
-"""
-Largest example | HIGHSCORE: 46
-to run this faster, run in your terminal
-`python product_scheduling.py`
-"""
-# PROCESSES = ['Assembly', 'Testing', 'Packaging', 'Loading']
-# PROCESS_TIMES = {
-#     'Cookie': {
-#         'Assembly': 2,
-#         'Testing': 1,
-#         'Packaging': 1,
-#         'Loading': 1
-#     },
-#     'EV car': {
-#         'Assembly': 10,
-#         'Testing': 2,
-#         'Packaging': 1,
-#         'Loading': 1
-#     },
-#     'Hose': {
-#         'Assembly': 1,
-#         'Testing': 2,
-#         'Packaging': 2,
-#         'Loading': 2
-#     },
-#     'Plumbus': {
-#         'Assembly': 4,
-#         'Testing': 5,
-#         'Packaging': 2,
-#         'Loading': 2
-#     },
-#     'Bomb': {
-#         'Assembly': 1,
-#         'Testing': 4,
-#         'Packaging': 5,
-#         'Loading': 2
-#     },
-#     'Cake': {
-#         'Assembly': 3,
-#         'Testing': 1,
-#         'Packaging': 2,
-#         'Loading': 1
-#     },
-#     'Bolts': {
-#         'Assembly': 1,
-#         'Testing': 1,
-#         'Packaging': 1,
-#         'Loading': 1
-#     }
-# }
-# DEMAND = {
-#     'Cookie': 15,
-#     'EV car': 10,
-#     'Hose': 14,
-#     'Plumbus': 7,
-#     'Bomb': 7,
-#     'Cake': 7,
-#     'Bolts': 20
-# }
-# MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
-# WORK_HOURS = 12
-# TIME_SLOT_DURATION = 5
 ###
 """
 variables
@@ -156,11 +42,6 @@ TIME_SLOTS = int(WORK_HOURS * 60 / TIME_SLOT_DURATION)
 
 # genetic algorithmp parameters
 ERROR_PENALTY = 10000
-# POP_SIZE = 200
-# CXPB, MUTPB, NGEN = 0.95, 0.675, 5000  # crossover probability, mutation probability, and number of generations
-# TOURNAMENT_SIZE = 5
-# N_EVALS = 0
-# N_GENS = 0
 """
 find the earliest time that a process can be in
 example:
@@ -186,30 +67,19 @@ total_products = 0
 for p in DEMAND:
     total_products += DEMAND[p]
 
+total_processes = total_products * len(PROCESSES)
+
 total_machines = 0
 for m in MACHINES:
     total_machines += MACHINES[m]
+
+possible_time_slots = TIME_SLOTS * total_machines
 
 # define fitness and individual
 creator.create("FitnessMin", base.Fitness, weights=(-1.0, -1.0, -1.0))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
 toolbox = base.Toolbox()
-"""
-PSEUDOCODE
-1. INITIALIZE EPS=1.5, SCHEDULE=[]
-2. FOR EACH product:
-3.      FOR EACH process:
-4.          FROM 1 to DEMAND of product:
-5.              machine = RANDOM INT BETWEEN 0 AND (available machines for process - 1)
-6.              CALCULATE TIME_SLOT:
-7.                  lowest_index = PROCESS_LAG of product of process
-8.                  highest_index = TIME_SLOTS - PROCESS_TIMES of product of process
-9.                  extend_range = highest_index * ((index of process + EPS) / number of processes)
-10.                 time_slot = RANDOM INT BETWEEN lowest_index AND MIN(lowest_index + extend_range, highest_index)
-11.             APPEND (product, process, machine, time_slot) to SCHEDULE
-12. RETURN SCHEDULE
-"""
 
 
 # individual generator
@@ -224,13 +94,11 @@ def create_individual():
                 lowest_index = process_lag[product][process]
                 highest_index = TIME_SLOTS - PROCESS_TIMES[product][process]
 
-                extend_range = int(highest_index *
-                                   (PROCESSES.index(process) + eps) /
-                                   (len(PROCESSES)))
+                rng = int(highest_index * (PROCESSES.index(process) + eps) /
+                          (len(PROCESSES)))
 
                 time_slot = random.randint(
-                    lowest_index,
-                    min(lowest_index + extend_range, highest_index))
+                    lowest_index, min(lowest_index + rng, highest_index))
 
                 schedule.append((product, process, machine, time_slot))
     return schedule
@@ -268,11 +136,6 @@ PSEUDOCODE
 
 
 def evaluate(individual):
-    # global N_EVALS, N_GENS
-    # N_EVALS += 1
-    # if N_EVALS % POP_SIZE == 0:
-    #     N_GENS += 1
-
     # used to hold penalty when process occur before previous process is done
     penalty = 0
 
@@ -447,34 +310,6 @@ def cxSelectiveTwoPoint(ind1, ind2):
 
         ind1[i] = (product1, process1, machine2, time_slot2)
         ind2[i] = (product2, process2, machine1, time_slot1)
-
-    return ind1, ind2
-
-
-def cxSelectiveOnePoint(ind1, ind2):
-    # choose crossover points
-    size = len(ind1)
-    cxpoint = random.randint(0, size - 1)
-
-    # swap the `machine` and `time_slot` between the two individuals from cxpoint1 to cxpoint2
-    swappb = random.randint(0, 1)
-
-    # keep `product` and `process` constant
-    product1, process1, machine1, time_slot1 = ind1[cxpoint]
-    product2, process2, machine2, time_slot2 = ind2[cxpoint]
-
-    if swappb < 0.6:
-        # swap `time_slot` values only
-        ind1[cxpoint] = (product1, process1, machine1, time_slot2)
-        ind2[cxpoint] = (product2, process2, machine2, time_slot1)
-    elif swappb < 0.95:
-        # swap `machine` values only
-        ind1[cxpoint] = (product1, process1, machine2, time_slot1)
-        ind2[i] = (product2, process2, machine1, time_slot2)
-    else:
-        # swap `machine` and `time_slot` values only
-        ind1[cxpoint] = (product1, process1, machine2, time_slot2)
-        ind2[cxpoint] = (product2, process2, machine1, time_slot1)
 
     return ind1, ind2
 
@@ -663,63 +498,12 @@ def printSchedule(schedule):
 
     print(Fore.WHITE + '')
 
-    with open('result.txt', 'w+') as f:
+    with open('medium_result.txt', 'w+') as f:
         f.write(write_str)
         f.close()
 
-    if (MODE == 'cx'):
-        with open('crossover_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('crossover_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
-    elif (MODE == 'mu'):
-        with open('mutation_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('mutation_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
-    elif (MODE == 'ngen'):
-        with open('ngen_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('ngen_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
-    elif (MODE == 'pop'):
-        with open('pop_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('pop_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
-    elif (MODE == 'tourn'):
-        with open('tourn_result.txt', 'a+') as f:
-            f.write('\n' + write_str + f'\n;\n')
-            f.close()
-
-        with open('tourn_medium.txt', 'a+') as f:
-            crs_data = f"{POP_SIZE},{CXPB},{MU_INDPB},{NGEN},{TOURNAMENT_SIZE},{makespan},{empty_machine},{products_waiting}\n"
-            f.write(crs_data)
-            f.close()
-
 
 def main():
-    # random.seed(42)
     random.seed(10)
     pop = toolbox.population(n=POP_SIZE)
     hof = tools.HallOfFame(1)
@@ -738,15 +522,6 @@ def main():
                                    halloffame=hof,
                                    verbose=True)
 
-    # pop, log = algorithms.eaSimple(pop,
-    #                                toolbox,
-    #                                cxpb=CallbackProxy(lambda: max(5.0 * N_GENS / NGEN - 0.05, 0.1)),
-    #                                mutpb=CallbackProxy(lambda: max(0.675 * (NGEN - N_GENS) / NGEN, 0.1)),
-    #                                ngen=NGEN,
-    #                                stats=stats,
-    #                                halloffame=hof,
-    #                                verbose=True)
-
     return pop, log, hof
 
 
@@ -759,96 +534,32 @@ if __name__ == '__main__':
 
     POP_SIZE = 100
     # crossover probability, mutation probability (population percentage), and number of generations
-    CXPB, MUTPB, NGEN = 0.85, 0.5, 4000  # MUTPB is kept constant
+    CXPB, MUTPB, NGEN = 0.85, 0.5, 10000  # MUTPB is kept constant
     MU_INDPB = 0.01  # individual mutation probability
     TOURNAMENT_SIZE = 4
-    MODE = ""
 
     toolbox.register("evaluate", evaluate)
     toolbox.register("mate", cxSelectiveTwoPoint)
-    # toolbox.register("mate", cxSelectiveOnePoint)
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
     toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
 
-    # # main driver
-    # pop, log, hof = main()
-    # best_ind = hof.items[0]
+    # main driver
+    begin = time.time()
+    pop, log, hof = main()
+    end = time.time()
 
-    # # output results
-    # printSchedule(best_ind)
+    with open('medium_time.txt', 'w+') as f:
+        f.write(
+            f"{end - begin},{total_processes},{total_products},{total_machines},{possible_time_slots}\n"
+        )
+        f.close()
 
-    MODE = 'cx'
-    TOURNAMENT_SIZE = 4
-    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
-    CXPB = 1.0
-    for i in range(25):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
+    best_ind = hof.items[0]
 
-        # output results
-        printSchedule(best_ind)
+    # output results
+    printSchedule(best_ind)
 
-        CXPB -= 0.04
-
-    MODE = 'mu'
-    CXPB = 0.85
-    MU_INDPB = 0.005
-    for i in range(31):
-        toolbox.register("mutate", mutate, indpb=MU_INDPB)
-
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
-
-        # output results
-        printSchedule(best_ind)
-
-        MU_INDPB += 0.01
-
-    MODE = 'ngen'
-    MU_INDPB = 0.01
-    toolbox.register("mutate", mutate, indpb=MU_INDPB)
-    NGEN = 250
-    for i in range(20):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
-
-        # output results
-        printSchedule(best_ind)
-
-        NGEN += 250
-
-    MODE = 'pop'
-    NGEN = 4000
-    POP_SIZE = 25
-    for i in range(30):
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
-
-        # output results
-        printSchedule(best_ind)
-
-        POP_SIZE += 25
-
-    MODE = 'tourn'
-    POP_SIZE = 100
-    TOURNAMENT_SIZE = 1
-    for i in range(10):
-        toolbox.register("select",
-                         tools.selTournament,
-                         tournsize=TOURNAMENT_SIZE)
-
-        # main driver
-        pop, log, hof = main()
-        best_ind = hof.items[0]
-
-        # output results
-        printSchedule(best_ind)
-
-        TOURNAMENT_SIZE += 1
+    print(f"Total runtime of the program is {end - begin}")
 
     pool.close()
 

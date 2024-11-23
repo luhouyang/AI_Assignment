@@ -7,7 +7,7 @@ from deap import base, creator, tools, algorithms  # https://deap.readthedocs.io
 
 # uncomment cases to test the algorithm
 """
-largest example | HIGHSCORE: 121
+largest example | HIGHSCORE: 39
 to run this faster, run in your terminal
 `python product_scheduling.py`
 """
@@ -637,7 +637,6 @@ if __name__ == '__main__':
 
 
     MODE = 'ngen'
-    MU_INDPB = 0.01
     NGEN = 250
     for i in range(20):
         # main driver

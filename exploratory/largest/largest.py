@@ -618,6 +618,16 @@ if __name__ == '__main__':
 
     TOURNAMENT_SIZE = 4
     POP_SIZE = 100
+    CXPB = 0.85
+    MU_INDPB = 0.01
+    toolbox.register("mutate", mutate, indpb=MU_INDPB)
+    toolbox.register("select", tools.selTournament, tournsize=TOURNAMENT_SIZE)
+    pop, log, hof = main()
+    best_ind = hof.items[0]
+    printSchedule(best_ind)
+
+    TOURNAMENT_SIZE = 4
+    POP_SIZE = 100
     CXPB = 0.9
     MU_INDPB = 0.01
     toolbox.register("mutate", mutate, indpb=MU_INDPB)
