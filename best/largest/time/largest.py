@@ -58,12 +58,12 @@ PROCESS_TIMES = {
 }
 DEMAND = {
     'Cookie': 15,
-    'EV car': 10,
-    'Hose': 14,
-    'Plumbus': 7,
-    'Bomb': 7,
-    'Cake': 7,
-    'Bolts': 20
+    'EV car': 20,
+    'Hose': 15,
+    'Plumbus': 12,
+    'Bomb': 12,
+    'Cake': 15,
+    'Bolts': 50
 }
 MACHINES = {'Assembly': 22, 'Testing': 15, 'Packaging': 13, 'Loading': 13}
 WORK_HOURS = 12
@@ -545,6 +545,8 @@ def printSchedule(schedule):
         f.write(log_str)
         f.close()
 
+    return makespan
+
 
 def main():
     # random.seed(42)
@@ -592,16 +594,18 @@ if __name__ == '__main__':
     pop, log, hof = main()
     end = time.time()
 
-    with open('largest_time.txt', 'a+') as f:
-        f.write(
-            f"{end - begin},{total_processes},{total_products},{total_machines},{possible_time_slots}\n"
-        )
-        f.close()
+    
 
     best_ind = hof.items[0]
 
     # output results
-    printSchedule(best_ind)
+    makespan = printSchedule(best_ind)
+
+    with open('largest_time.txt', 'a+') as f:
+        f.write(
+            f"{end - begin},{total_processes},{total_products},{total_machines},{possible_time_slots},{TIME_SLOTS},{makespan}\n"
+        )
+        f.close()
 
     print(f"Total runtime of the program is {end - begin}")
 

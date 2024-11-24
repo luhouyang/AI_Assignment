@@ -32,7 +32,7 @@ PROCESS_TIMES = {
         'Loading': 2
     }
 }
-DEMAND = {'Product 1': 12, 'Product 2': 13, 'Product 3': 12}
+DEMAND = {'Product 1': 25, 'Product 2': 25, 'Product 3': 20}
 MACHINES = {'Assembly': 7, 'Testing': 7, 'Packaging': 7, 'Loading': 7}
 WORK_HOURS = 12
 TIME_SLOT_DURATION = 10
